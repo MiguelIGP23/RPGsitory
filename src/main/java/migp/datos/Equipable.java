@@ -4,22 +4,22 @@ import migp.enums.TiposEquipable;
 
 public class Equipable {
 
-    private TiposEquipable tipo;
     private String nombre;
+    private TiposEquipable tipo;
     private int poder;      //implica daño hecho o daño resistido
 
-    public Equipable(TiposEquipable tipo, String nombre, int poder){
-        this.tipo=tipo;
+    public Equipable(String nombre,TiposEquipable tipo,  int poder){
         this.nombre=nombre;
+        this.tipo=tipo;
         this.poder=poder;
-    }
-
-    public TiposEquipable getTipo() {
-        return tipo;
     }
 
     public String getNombre() {
         return nombre;
+    }
+
+    public TiposEquipable getTipo() {
+        return tipo;
     }
 
     public int getPoder() {
@@ -29,8 +29,8 @@ public class Equipable {
     @Override
     public String toString() {
         return "Equipable{" +
-                "tipo=" + tipo +
                 ", nombre='" + nombre + '\'' +
+                "tipo=" + tipo +
                 ", poder=" + poder +
                 '}';
     }
