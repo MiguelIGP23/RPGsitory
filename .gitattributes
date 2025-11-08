@@ -1,0 +1,2 @@
+# Siempre mantener la versión local del archivo de base de datos al hacer merge por si se modifica
+src/main/resources/rpg.db merge=ours
