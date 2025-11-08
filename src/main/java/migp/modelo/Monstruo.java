@@ -7,6 +7,8 @@ public class Monstruo {
     //Atributos de clase - parámetros para ajustar daño
     public static final int DANO_VENENO = 6;
     public static final int TURNOS_VENENO = 3;
+    public static final double SUBIDA_NIVEL =0.1;
+
 
     //Atributos de instancia
     private TiposMonstruo tipoMonstruo;
@@ -27,10 +29,10 @@ public class Monstruo {
 
         this.tipoMonstruo = tipo;
         this.vida = (int) (vida + (vida * 0.15 * (nivel - 1)));
-        this.fuerza = (int) (fuerza + (fuerza * 0.1 * (nivel - 1)));
-        this.defensa = (int) (defensa + (defensa * 0.1 * (nivel - 1)));
-        this.habilidad = (int) (habilidad + (habilidad * 0.1 * (nivel - 1)));
-        this.velocidad = (int) (velocidad + (velocidad * 0.1 * (nivel - 1)));
+        this.fuerza = (int) (fuerza + (fuerza * SUBIDA_NIVEL * (nivel - 1)));
+        this.defensa = (int) (defensa + (defensa * SUBIDA_NIVEL * (nivel - 1)));
+        this.habilidad = (int) (habilidad + (habilidad * SUBIDA_NIVEL * (nivel - 1)));
+        this.velocidad = (int) (velocidad + (velocidad * SUBIDA_NIVEL * (nivel - 1)));
 
         this.muerto = false;
         this.envenenado = false;
