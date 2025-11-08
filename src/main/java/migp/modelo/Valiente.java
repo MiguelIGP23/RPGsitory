@@ -10,9 +10,9 @@ public class Valiente {
 
     //Atributos de clase - parámetros para daño de habilidades
     public static final float DANO_HAB_GUERRERO = 1.6f;
-    public static final float DANO_HAB_PALADIN = 0.4f;
-    public static final float DANO_HAB_MAGO = 0.5f;
-    public static final float DANO_HAB_PICARO = 0.6f;
+    public static final float DANO_HAB_PALADIN = 0.5f;
+    public static final float DANO_HAB_MAGO = 0.4f;
+    public static final float DANO_HAB_PICARO = 0.4f;
 
     public static final float AUMENTO_DEFENSA_PALADIN = 0.40f;
     public static final float REDUCCION_ATAQUE_MAGO = 0.30f;
@@ -26,7 +26,7 @@ public class Valiente {
     private int velocidad;
     private String arma;
     private String escudo;
-    private int anInt;
+    private int nivel;
 
     private boolean muerto;
     private boolean buff;
@@ -43,7 +43,7 @@ public class Valiente {
         this.velocidad = velocidad;
         this.arma = arma;
         this.escudo = escudo;
-        this.anInt = nivel;
+        this.nivel = nivel;
 
         this.muerto = false;
         this.buff=false;
@@ -62,14 +62,25 @@ public class Valiente {
         return vida;
     }
 
-    public List<Monstruo> getVictorias() {
-        return victorias;
+    public int getDefensa() {
+        return defensa;
+    }
+
+    public int getVelocidad() {
+        return velocidad;
+    }
+
+    public int getHabilidad() {
+        return habilidad;
     }
 
     public boolean getMuerto() {
         return muerto;
     }
 
+    public String getEscudo() {
+        return escudo;
+    }
 
     //Metodos set
 
@@ -81,17 +92,16 @@ public class Valiente {
     //Metodo toString
     @Override
     public String toString() {
-        return "Valiente -> " +
-                "Tipo: " + tipoValiente +
-                ", Nivel: " + anInt +
+        return tipoValiente +
+                ": Nivel: " + nivel +
                 ", Vida: " + vida +
                 ", Fuerza: " + fuerza +
                 ", Defensa: " + defensa +
                 ", Habilidad: " + habilidad +
                 ", Velocidad: " + velocidad +
                 ", Arma: " + arma +
-                ", Escudo: " + escudo +
-                '}';
+                ", Escudo: " + escudo
+                ;
     }
 
 
@@ -164,7 +174,7 @@ public class Valiente {
                 atacar(enemigo, danoExtra);
                 if(!enemigo.getEnvenenado()) {
                     enemigo.cambiarEstadoVeneno(true);
-                    System.out.println(enemigo.getTipo() + " envenenado! (6vida/turno)");
+                    System.out.println(enemigo.getTipoMonstruo() + " envenenado! (6vida/turno)");
                 }
             }
         }
@@ -182,9 +192,9 @@ public class Valiente {
 
     //Sube nivel y stats
     public void subirNivel() {
-        System.out.printf("-Nivel " + anInt + " +1\t\t\t-Vida " + vida + " +10\n-Fuerza " + fuerza + " +1" +
+        System.out.printf("-Nivel " + nivel + " +1\t\t\t-Vida " + vida + " +10\n-Fuerza " + fuerza + " +1" +
                 "\t\t-Defensa " + defensa + " +1\n-Habilidad " + habilidad + " +1\t-Velocidad " + velocidad + " +1\n\n");
-        this.anInt++;
+        this.nivel++;
         this.vida += 10;
         this.fuerza++;
         this.defensa++;

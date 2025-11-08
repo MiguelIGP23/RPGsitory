@@ -9,7 +9,7 @@ public class Monstruo {
     public static final int TURNOS_VENENO = 3;
 
     //Atributos de instancia
-    private TiposMonstruo tipo;
+    private TiposMonstruo tipoMonstruo;
     private int vida;
     private int fuerza;
     private int defensa;
@@ -21,14 +21,16 @@ public class Monstruo {
     private boolean envenenado;
     private int contadorVeneno;
 
-    public Monstruo(TiposMonstruo tipo, int vida, int fuerza, int defensa, int habilidad, int velocidad, int nivel) {
-        this.tipo = tipo;
-        this.vida = vida;
-        this.fuerza = fuerza;
-        this.defensa = defensa;
-        this.habilidad = habilidad;
-        this.velocidad = velocidad;
-        this.nivel = nivel;
+    public Monstruo(TiposMonstruo tipo, int vida, int fuerza, int defensa, int habilidad, int velocidad) {
+        double lvl = Math.random() * 10;
+        this.nivel = ( lvl < 1) ? 1 : ((int) lvl);
+
+        this.tipoMonstruo = tipo;
+        this.vida = (int) (vida + (vida * 0.15 * (nivel - 1)));
+        this.fuerza = (int) (fuerza + (fuerza * 0.1 * (nivel - 1)));
+        this.defensa = (int) (defensa + (defensa * 0.1 * (nivel - 1)));
+        this.habilidad = (int) (habilidad + (habilidad * 0.1 * (nivel - 1)));
+        this.velocidad = (int) (velocidad + (velocidad * 0.1 * (nivel - 1)));
 
         this.muerto = false;
         this.envenenado = false;
@@ -37,12 +39,24 @@ public class Monstruo {
 
 
     //Metodos get
-    public TiposMonstruo getTipo() {
-        return tipo;
+    public TiposMonstruo getTipoMonstruo() {
+        return tipoMonstruo;
     }
 
     public int getFuerza() {
         return fuerza;
+    }
+
+    public int getDefensa() {
+        return defensa;
+    }
+
+    public int getHabilidad() {
+        return habilidad;
+    }
+
+    public int getVelocidad() {
+        return velocidad;
     }
 
     public boolean getMuerto() {
@@ -66,21 +80,19 @@ public class Monstruo {
     //ToString
     @Override
     public String toString() {
-        return "Monstruo{" +
-                "tipo='" + tipo + '\'' +
-                ", vida=" + vida +
+        return tipoMonstruo +
+                ", nivel=" + nivel +
+                ": vida=" + vida +
                 ", fuerza=" + fuerza +
                 ", defensa=" + defensa +
                 ", habilidad=" + habilidad +
-                ", velocidad=" + velocidad +
-                ", nivel=" + nivel +
-                '}';
+                ", velocidad=" + velocidad
+                ;
     }
 
 
     //Ataca a valiente
     public void atacar(Valiente valiente) {
-
         valiente.recibirDano(fuerza);
     }
 
@@ -92,7 +104,7 @@ public class Monstruo {
             dano += DANO_VENENO;
             if ((contadorVeneno--) == 0) {
                 cambiarEstadoVeneno(false);
-                System.out.println(tipo + " ya no esta envenenado");
+                System.out.println(tipoMonstruo + " ya no esta envenenado");
             }
         }
         if (this.vida - dano <= 0) {
@@ -101,7 +113,7 @@ public class Monstruo {
         } else {
             this.vida -= dano;
         }
-        System.out.printf("%s pierde %d de vida\n", tipo, dano);
+        System.out.printf("%s pierde %d de vida\n", tipoMonstruo, dano);
         return this.muerto;
     }
 
@@ -110,7 +122,7 @@ public class Monstruo {
     public void cambiarEstadoVeneno(boolean envenenar) {
         this.envenenado = envenenar;
         if (envenenar) {
-            contadorVeneno = TURNOS_VENENO-1;
+            contadorVeneno = TURNOS_VENENO - 1;
         }
     }
 }

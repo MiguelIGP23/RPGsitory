@@ -14,11 +14,10 @@ public class Main {
         Monstruo m = daom.buscarPorTipo("DRAGON_ROJO");
 
         DaoValiente daov = new DaoValiente();
-        Valiente v = daov.buscarPorTipo("picaro".toUpperCase());
+        Valiente v = daov.buscarPorTipo("guerrero".toUpperCase());
 
-        System.out.println(v.toString());
-        System.out.println(m.toString());
 
+        System.out.println();
         v.setArma("DAGA");
 //        v.setEscudo("ESCUDO_DE_HIERRO");
         Combate.iniciarCombate(v, m);
