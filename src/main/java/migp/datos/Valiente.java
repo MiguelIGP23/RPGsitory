@@ -137,7 +137,7 @@ public class Valiente {
             }
             case MAGO ->{
                 //Quita 50% y reduce ataque enemigo 30%
-      -          int danoExtra = Math.round(-fuerza*0.50f);
+                int danoExtra = Math.round(-fuerza*0.50f);
                 atacar(enemigo, danoExtra);
                 int ataqueReducido = Math.round(enemigo.getFuerza()*0.7f);
                 enemigo.setFuerza(ataqueReducido);
