@@ -1,6 +1,6 @@
-package migp.datos;
+package migp.modelo;
 
-import migp.enums.TiposMonstruo;
+import migp.modelo.enums.TiposMonstruo;
 
 public class Monstruo {
 
@@ -91,6 +91,7 @@ public class Monstruo {
     }
 
     public void atacar(Valiente valiente){
+
         valiente.recibirDano(fuerza);
     }
 
@@ -104,7 +105,7 @@ public class Monstruo {
         }else {
             this.vida -= dano;
         }
-        System.out.printf("%s pierde %d de vida\n", tipo, dano);
+        System.out.printf("%s pierde %d de vida\n\n", tipo, dano);
     }
 
     public void aplicarVeneno(){

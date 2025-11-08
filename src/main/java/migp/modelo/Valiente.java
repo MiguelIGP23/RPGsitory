@@ -1,7 +1,10 @@
-package migp.datos;
+package migp.modelo;
 
-import migp.enums.TiposValiente;
-import migp.gestionBaseDatos.DaoEquipable;
+import migp.modelo.enums.TiposValiente;
+import migp.datos.datosJuego.DaoEquipable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Valiente {
 
@@ -15,6 +18,8 @@ public class Valiente {
     private String escudo;
     private int nivel;
 
+    private List<Monstruo> victorias;       //Guarda historial de monstruos derrotados
+
     public Valiente(TiposValiente tipoValiente, int vida, int fuerza, int defensa, int habilidad, int velocidad, String arma, String escudo, int nivel){
         this.tipoValiente = tipoValiente;
         this.vida=vida;
@@ -25,6 +30,7 @@ public class Valiente {
         this.arma=arma;
         this.escudo=escudo;
         this.nivel=nivel;
+        this.victorias= new ArrayList<>();
     }
 
     public TiposValiente getTipoValiente() {
@@ -110,7 +116,7 @@ public class Valiente {
         if(arma!=null){
             ataque+=arma.getPoder();
         }
-        System.out.printf("%s atacó a %s\n", tipoValiente, enemigo.getTipo());
+        System.out.printf("%s atacó a %s\n\n", tipoValiente, enemigo.getTipo());
         enemigo.recibirDaño(ataque);
     }
 
@@ -127,27 +133,43 @@ public class Valiente {
             case GUERRERO -> {
                 //Golpe fuerte quita 60% más sobre fuerza
                 int danoExtra = Math.round(fuerza*0.6f);
+                System.out.println(tipoValiente+" utilizó Golpe Mortal! (daño extra: "+danoExtra+")\n");
                 atacar(enemigo, danoExtra);
             }
             case PALADIN ->{
                 //Quita 60% y sube la defensa 40%
                 int danoExtra = Math.round(-fuerza*0.40f);
+                System.out.println(tipoValiente+" utilizó escudo sacro!\n");
                 atacar(enemigo, danoExtra);
                 this.defensa*=1.4f;
+                System.out.println("Defensa de "+tipoValiente+" aumentada 40%\n");
             }
             case MAGO ->{
                 //Quita 50% y reduce ataque enemigo 30%
                 int danoExtra = Math.round(-fuerza*0.50f);
+                System.out.println(tipoValiente+" utilizó bola de escarcha!\n");
                 atacar(enemigo, danoExtra);
                 int ataqueReducido = Math.round(enemigo.getFuerza()*0.7f);
                 enemigo.setFuerza(ataqueReducido);
+                System.out.println("Ataque "+enemigo.getTipo()+" reducido 30%\n");
             }
             case PICARO ->{
                 //Quita 40% y aplica veneno que quita 6vida/turno
                 int danoExtra = Math.round(-fuerza*0.6f);
+                System.out.println(tipoValiente+" utilizó hoja del pantano!\n");
                 atacar(enemigo, danoExtra);
                 enemigo.aplicarVeneno();
+                System.out.println(enemigo.getTipo()+" envenenado! (6vida/turno)\n");
             }
         }
+    }
+
+    public void subirNivel(){
+        this.nivel++;
+        this.vida+=10;
+        this.fuerza++;
+        this.defensa++;
+        this.habilidad++;
+        this.velocidad++;
     }
 }

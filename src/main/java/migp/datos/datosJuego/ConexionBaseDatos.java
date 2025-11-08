@@ -1,4 +1,4 @@
-package migp.gestionBaseDatos;
+package migp.datos.datosJuego;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

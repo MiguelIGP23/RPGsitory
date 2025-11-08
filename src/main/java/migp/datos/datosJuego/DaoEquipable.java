@@ -1,7 +1,7 @@
-package migp.gestionBaseDatos;
+package migp.datos.datosJuego;
 
-import migp.datos.Equipable;
-import migp.enums.TiposEquipable;
+import migp.modelo.Equipable;
+import migp.modelo.enums.TiposEquipable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
