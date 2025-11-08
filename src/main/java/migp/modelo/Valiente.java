@@ -9,12 +9,13 @@ import java.util.List;
 public class Valiente {
 
     //Atributos de clase - parámetros para daño de habilidades
-    public static final double DANO_HAB_GUERRERO = 0.6;
-    public static final double DANO_HAB_PALADIN = 0.4;
-    public static final double AUMENTO_DEFENSA_PALADIN = 0.4;
-    public static final double DANO_HAB_MAGO = 0.5;
-    public static final double REDUCCION_ATAQUE_MAGO = 0.30;
-    public static final double DANO_HAB_PICARO = 0.6;
+    public static final float DANO_HAB_GUERRERO = 1.6f;
+    public static final float DANO_HAB_PALADIN = 0.4f;
+    public static final float DANO_HAB_MAGO = 0.5f;
+    public static final float DANO_HAB_PICARO = 0.6f;
+
+    public static final float AUMENTO_DEFENSA_PALADIN = 0.40f;
+    public static final float REDUCCION_ATAQUE_MAGO = 0.30f;
 
     //Atributos de instancia
     private TiposValiente tipoValiente;
@@ -95,15 +96,15 @@ public class Valiente {
 
 
     //Quita bonus poder escudo actual y suma bonus poder escudo nuevo
-    public void setEscudo(String escudo) {
+    public void equiparEscudo(String escudo) {
         DaoEquipable dao = new DaoEquipable();
         Equipable escudoActual = dao.buscarPorTipo(this.escudo);
         Equipable escudoNuevo = dao.buscarPorTipo(escudo);
-
-        this.defensa -= (defensa);
         this.escudo = escudo;
-        Equipable es = dao.buscarPorTipo(escudo);
-        this.defensa += es.getPoder();
+        if(escudoActual!=null) {
+            this.defensa -= escudoActual.getPoder();
+        }
+        this.defensa += escudoNuevo.getPoder();
     }
 
     //Ataca a monstruo
@@ -134,36 +135,36 @@ public class Valiente {
     public void usarHabilidadEspecial(Monstruo enemigo) {
         switch (tipoValiente) {
             case GUERRERO -> {
-                //Golpe 1.6
-                int danoExtra = Math.round(fuerza * 0.6f);
+                //Golpe fuerte daño extra
+                int danoExtra = Math.round(fuerza * DANO_HAB_GUERRERO);
                 System.out.println(tipoValiente + " utilizó Carga Asesina!\n");
                 atacar(enemigo, danoExtra);
             }
             case PALADIN -> {
-                //Quita 0.6 y sube la defensa 40%
-                int danoExtra = Math.round(fuerza * -0.40f);
+                //Golpe flojo y aumenta defensa
+                int danoExtra = Math.round(fuerza * (DANO_HAB_PALADIN-1));
                 System.out.println(tipoValiente + " utilizó Armadura Sacra!\n");
                 atacar(enemigo, danoExtra);
-                this.defensa *= 1.4f;
+                this.defensa += Math.round(defensa*AUMENTO_DEFENSA_PALADIN);
                 System.out.println("Defensa de " + tipoValiente + " aumentada 40%\n");
             }
             case MAGO -> {
-                //Quita 0.5 y reduce ataque enemigo 30%
-                int danoExtra = Math.round(fuerza * -0.50f);
+                //Golpe flojo y baja ataque
+                int danoExtra = Math.round(fuerza * (DANO_HAB_MAGO-1));
                 System.out.println(tipoValiente + " utilizo Bola de Escarcha!\n");
                 atacar(enemigo, danoExtra);
-                int ataqueReducido = Math.round(enemigo.getFuerza() * 0.7f);
+                int ataqueReducido = Math.round(enemigo.getFuerza() * (REDUCCION_ATAQUE_MAGO-1));
                 enemigo.setFuerza(ataqueReducido);
                 System.out.println("Ataque " + enemigo + " reducido 30%\n");
             }
             case PICARO -> {
-                //Quita 0.4 y aplica veneno que quita 6vida/turno
-                int danoExtra = Math.round(fuerza * -0.6f);
+                //Golpe flojo y aplica veneno
+                int danoExtra = Math.round(fuerza * (DANO_HAB_PICARO-1));
                 System.out.println(tipoValiente + " utilizó Colmillo Podrido!\n");
                 atacar(enemigo, danoExtra);
                 if(!enemigo.getEnvenenado()) {
                     enemigo.cambiarEstadoVeneno(true);
-                    System.out.println(enemigo.getTipo() + " envenedado! (6vida/turno)");
+                    System.out.println(enemigo.getTipo() + " envenenado! (6vida/turno)");
                 }
             }
         }

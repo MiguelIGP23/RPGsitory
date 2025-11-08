@@ -111,8 +111,6 @@ public class Monstruo {
         this.envenenado = envenenar;
         if (envenenar) {
             contadorVeneno = TURNOS_VENENO-1;
-        } else {
-            this.envenenado = false;
         }
     }
 }
