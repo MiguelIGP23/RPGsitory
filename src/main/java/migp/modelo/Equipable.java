@@ -1,6 +1,6 @@
-package migp.datos;
+package migp.modelo;
 
-import migp.enums.TiposEquipable;
+import migp.modelo.enums.TiposEquipable;
 
 public class Equipable {
 

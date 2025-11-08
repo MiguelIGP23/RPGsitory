@@ -1,4 +1,4 @@
-package migp.enums;
+package migp.modelo.enums;
 
 public enum TiposEquipable {
     ARMA, ESCUDO

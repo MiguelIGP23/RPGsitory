@@ -1,4 +1,4 @@
-package migp.gestionBaseDatos;
+package migp.datos.datosJuego;
 
 import java.sql.SQLException;
 import java.util.List;

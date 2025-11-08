@@ -6,5 +6,10 @@
 -Para arma y escudo, tabla objetos en bd con id nombreObjeto-PK, columna tipo (arma,escudo), y columna valor (daño hecho o cubierto)
 
 
--Implemenntar metodo para despues de un combate, resetear buffs/debuffs de ataque y defensa
+-----COSAS A HACER-----
+
+-Implementar metodo para despues de un combate, resetear buffs/debuffs de ataque y defensa
+
+-CrearDB independiente para persistencia y poder guardar partida
+        ->Crear otra conexion para esa BD con su DAO
 
