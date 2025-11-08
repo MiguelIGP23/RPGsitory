@@ -1,13 +1,16 @@
 package migp;
 
 
+import migp.datos.Monstruo;
 import migp.gestionBaseDatos.ConexionBaseDatos;
+import migp.gestionBaseDatos.DaoMonstruo;
 
 import java.sql.*;
 
 public class Main {
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) {
 
-        Connection con = ConexionBaseDatos.getInstance().getConnection();
+        DaoMonstruo dao = new DaoMonstruo();
+
     }
 }

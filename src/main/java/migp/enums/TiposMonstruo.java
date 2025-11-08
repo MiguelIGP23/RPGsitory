@@ -1,0 +1,27 @@
+package migp.enums;
+
+public enum TiposMonstruo {
+    CUBO_GELATINOSO,
+    MIMIC,
+    TIEFLING,
+    AARAKOCRA,
+    ORCO,
+    OSO_LECHUZA,
+    DEVORADOR_INTELECTOS,
+    KOBOLD,
+    YUAN_TI,
+    DRACONIDO,
+    DRAGON_NEGRO,
+    DRAGON_PIEDRA,
+    DRAGON_ROJO,
+    HOMBRE_TIGRE,
+    ABRIAN,
+    ARANA_GIGANTE,
+    ALMEJA_GIGANTE,
+    SILURO_GIGANTE,
+    HONGOS,
+    LICHE,
+    NO_MUERTO,
+    BESTIA_DESPLAZADORA,
+
+}

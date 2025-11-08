@@ -1,0 +1,7 @@
+
+-Monstruos y valientes tienen atributo tipo, recibe datos de tablas monstruos y valientes de la bd rpg.bd
+
+-Al tener un enum con tiposMonstruo y poder buscar por tipo en bd, recorrer y elegir aleatorio del enum para enemigo aleatorio
+
+-Para arma y escudo, tabla objetos en bd con id nombreObjeto-PK, columna tipo (arma,escudo), y columna valor (daño hecho o cubierto)
+
