@@ -150,4 +150,13 @@ public class Valiente {
             }
         }
     }
+
+    public void subirNivel(){
+        this.nivel++;
+        this.vida+=10;
+        this.fuerza++;
+        this.defensa++;
+        this.habilidad++;
+        this.velocidad++;
+    }
 }
