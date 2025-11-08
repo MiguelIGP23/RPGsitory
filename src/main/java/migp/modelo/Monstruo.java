@@ -4,6 +4,11 @@ import migp.modelo.enums.TiposMonstruo;
 
 public class Monstruo {
 
+    //Atributos de clase - parámetros para ajustar daño
+    public static final int DANO_VENENO = 6;
+    public static final int TURNOS_VENENO = 3;
+
+    //Atributos de instancia
     private TiposMonstruo tipo;
     private int vida;
     private int fuerza;
@@ -12,71 +17,53 @@ public class Monstruo {
     private int velocidad;
     private int nivel;
 
+    private boolean muerto;
     private boolean envenenado;
+    private int contadorVeneno;
 
-    public Monstruo(TiposMonstruo tipo, int vida, int fuerza, int defensa, int habilidad, int velocidad, int nivel){
-        this.tipo=tipo;
-        this.vida=vida;
-        this.fuerza=fuerza;
-        this.defensa=defensa;
-        this.habilidad=habilidad;
-        this.velocidad=velocidad;
-        this.nivel=nivel;
-        this.envenenado=false;
+    public Monstruo(TiposMonstruo tipo, int vida, int fuerza, int defensa, int habilidad, int velocidad, int nivel) {
+        this.tipo = tipo;
+        this.vida = vida;
+        this.fuerza = fuerza;
+        this.defensa = defensa;
+        this.habilidad = habilidad;
+        this.velocidad = velocidad;
+        this.nivel = nivel;
+
+        this.muerto = false;
+        this.envenenado = false;
+        this.contadorVeneno = 0;
     }
 
+
+    //Metodos get
     public TiposMonstruo getTipo() {
         return tipo;
-    }
-
-    public int getVida() {
-        return vida;
     }
 
     public int getFuerza() {
         return fuerza;
     }
 
-    public int getDefensa() {
-        return defensa;
+    public boolean getMuerto() {
+        return muerto;
     }
 
-    public int getHabilidad() {
-        return habilidad;
+    public int getVida() {
+        return vida;
     }
 
-    public int getVelocidad() {
-        return velocidad;
+    public boolean getEnvenenado() {
+        return envenenado;
     }
 
-    public int getNivel() {
-        return nivel;
-    }
-
-    public void setVida(int vida) {
-        this.vida = vida;
-    }
-
+    //Metodos set
     public void setFuerza(int fuerza) {
         this.fuerza = fuerza;
     }
 
-    public void setDefensa(int defensa) {
-        this.defensa = defensa;
-    }
 
-    public void setHabilidad(int habilidad) {
-        this.habilidad = habilidad;
-    }
-
-    public void setVelocidad(int velocidad) {
-        this.velocidad = velocidad;
-    }
-
-    public void setNivel(int nivel) {
-        this.nivel = nivel;
-    }
-
+    //ToString
     @Override
     public String toString() {
         return "Monstruo{" +
@@ -90,25 +77,42 @@ public class Monstruo {
                 '}';
     }
 
-    public void atacar(Valiente valiente){
+
+    //Ataca a valiente
+    public void atacar(Valiente valiente) {
 
         valiente.recibirDano(fuerza);
     }
 
-    public void recibirDaño(int cantidad){
-        int dano=cantidad;
-        if(envenenado){
-            dano+=6;
+    //Recibe daño de valiente
+    //Si esta envenenado, aplica daño veneno, reduce contador y quita veneno al llegar a 0
+    public boolean recibirDaño(int cantidad) {
+        int dano = cantidad;
+        if (envenenado) {
+            dano += DANO_VENENO;
+            if ((contadorVeneno--) == 0) {
+                cambiarEstadoVeneno(false);
+                System.out.println(tipo + " ya no esta envenenado");
+            }
         }
-        if(this.vida-dano<0) {
-            this.vida=0;
-        }else {
+        if (this.vida - dano <= 0) {
+            this.vida = 0;
+            this.muerto = true;
+        } else {
             this.vida -= dano;
         }
-        System.out.printf("%s pierde %d de vida\n\n", tipo, dano);
+        System.out.printf("%s pierde %d de vida\n", tipo, dano);
+        return this.muerto;
     }
 
-    public void aplicarVeneno(){
-        this.envenenado=true;
+    //Si recibe true, cambia envenado a true e inicia contador 3 turnos veneno
+    //Si recibe false anula estado veneno
+    public void cambiarEstadoVeneno(boolean envenenar) {
+        this.envenenado = envenenar;
+        if (envenenar) {
+            contadorVeneno = TURNOS_VENENO-1;
+        } else {
+            this.envenenado = false;
+        }
     }
 }

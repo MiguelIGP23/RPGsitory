@@ -1,6 +1,7 @@
 package migp;
 
 
+import migp.logica.Combate;
 import migp.modelo.Monstruo;
 import migp.modelo.Valiente;
 import migp.datos.datosJuego.DaoMonstruo;
@@ -19,18 +20,9 @@ public class Main {
         System.out.println(m.toString());
 
         v.setArma("DAGA");
-        v.atacar(m, 0);
-        System.out.println(m.toString());
-
-        v.usarHabilidadEspecial(m);
-        System.out.println(m.toString());
-
-        v.setArma("DAGA");
-        v.atacar(m, 0);
-        System.out.println(m.toString())
-        ;
-        v.setArma("DAGA");
-        v.atacar(m, 0);
-        System.out.println(m.toString());
+//        v.setEscudo("ESCUDO_DE_HIERRO");
+        Combate.iniciarCombate(v, m);
+        System.out.println(v);
+        System.out.println(m);
     }
 }
