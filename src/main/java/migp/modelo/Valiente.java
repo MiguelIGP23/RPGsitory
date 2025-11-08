@@ -1,7 +1,7 @@
 package migp.modelo;
 
-import migp.modelo.enums.TiposValiente;
 import migp.datos.datosJuego.DaoEquipable;
+import migp.modelo.enums.TiposValiente;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -147,19 +147,19 @@ public class Valiente {
             case MAGO ->{
                 //Quita 50% y reduce ataque enemigo 30%
                 int danoExtra = Math.round(-fuerza*0.50f);
-                System.out.println(tipoValiente+" utilizó bola de escarcha!\n");
+                System.out.println(tipoValiente+" utilizo bola de escarcha!\n");
                 atacar(enemigo, danoExtra);
                 int ataqueReducido = Math.round(enemigo.getFuerza()*0.7f);
                 enemigo.setFuerza(ataqueReducido);
-                System.out.println("Ataque "+enemigo.getTipo()+" reducido 30%\n");
+                System.out.println("Ataque "+enemigo+" reducido 30%\n");
             }
             case PICARO ->{
                 //Quita 40% y aplica veneno que quita 6vida/turno
                 int danoExtra = Math.round(-fuerza*0.6f);
-                System.out.println(tipoValiente+" utilizó hoja del pantano!\n");
+                System.out.println(tipoValiente+" utilizó daga del pantano!");
                 atacar(enemigo, danoExtra);
                 enemigo.aplicarVeneno();
-                System.out.println(enemigo.getTipo()+" envenenado! (6vida/turno)\n");
+                System.out.println(tipoValiente+" envenedado! (6vida/turno)");
             }
         }
     }
