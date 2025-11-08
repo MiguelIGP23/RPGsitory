@@ -5,3 +5,6 @@
 
 -Para arma y escudo, tabla objetos en bd con id nombreObjeto-PK, columna tipo (arma,escudo), y columna valor (daño hecho o cubierto)
 
+
+-Implemenntar metodo para despues de un combate, resetear buffs/debuffs de ataque y defensa
+
