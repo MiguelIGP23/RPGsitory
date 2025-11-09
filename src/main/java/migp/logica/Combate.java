@@ -9,6 +9,10 @@ import java.util.Scanner;
 
 public class Combate {
 
+    //Atributos de clase para ajustar % de golpe
+    public static final int BASE_HIT = 70;              //% de golpe si atk=def+esc
+    public static final double DIFICULTAD = 3.0;        //más valor -> más diferencia entre niveles para % golpeo
+
 
     //Inicia bucle de combate entre valiente y monstruo, termina cuando uno muere
     public static void iniciarCombate(Valiente valiente, Monstruo monstruo) {
@@ -33,14 +37,12 @@ public class Combate {
         //Calcula iniciativa
         double iniVal = iniciativa(valiente);
         double iniMon = iniciativa(monstruo);
-        System.out.println(":::TAG - despues calcular iniciativas   iniVal "+iniVal+"   iniMon "+iniMon);
         //Recoge opcion menu antes de empezar ataques
         System.out.println("1.Ataque   2.Usar habilidad");
         int opcion = new Scanner(System.in).nextInt();
         if (iniMon > iniVal) {
             if (ataqueExitoso(monstruo, valiente)) {
                 monstruo.atacar(valiente);
-                System.out.println(":::TAG - despues ataque monstruo + rapido");
                 System.out.println("-HP "+valiente.getTipoValiente()+": "+valiente.getVida());
             } else {
                 System.out.println(monstruo.getTipoMonstruo() + " falló el ataque!");
@@ -48,7 +50,6 @@ public class Combate {
             if (!valiente.getMuerto()) {
                 if (ataqueExitoso(valiente, monstruo)) {
                     opcionesCombate(valiente, monstruo, opcion);
-                    System.out.println(":::TAG - despues ataque valiente - rapido");
                     System.out.println("-HP "+monstruo.getTipoMonstruo()+": "+monstruo.getVida());
                 } else {
                     System.out.println(valiente.getTipoValiente() + " tu ataque falló!\n");
@@ -57,7 +58,6 @@ public class Combate {
         } else {
             if (ataqueExitoso(valiente, monstruo)) {
                 opcionesCombate(valiente, monstruo, opcion);
-                System.out.println(":::TAG - despues de ataque valiente + rapido");
                 System.out.println("-HP "+monstruo.getTipoMonstruo()+": "+monstruo.getVida());
             }else {
                 System.out.println(valiente.getTipoValiente() + " tu ataque falló!");
@@ -65,7 +65,6 @@ public class Combate {
             if (!monstruo.getMuerto()) {
                 if (ataqueExitoso(monstruo, valiente)) {
                     monstruo.atacar(valiente);
-                    System.out.println(":::TAG - despues golpde monstruo - rapido");
                     System.out.println("-HP "+valiente.getTipoValiente()+": "+valiente.getVida());
                 }else{
                     System.out.println(monstruo.getTipoMonstruo() + " falló el ataque!\n");
@@ -93,18 +92,39 @@ public class Combate {
         return iniciativa;
     }
 
-    //Determina si ataque tiene exito
-    public static boolean ataqueExitoso(Object atacante, Object defensor) {
+    //La formula del enunciado da tasas de éxito ~0
+//    public static boolean ataqueExitoso(Object atacante, Object defensor) {
+//        boolean exito = false;
+//        int random = (int) (Math.random() * 101);
+//        if (atacante instanceof Valiente ata && defensor instanceof Monstruo def) {
+//            if (random < (ata.getHabilidad() - def.getDefensa())) {
+//                exito = true;
+//            }
+//        } else if (atacante instanceof Monstruo ata && defensor instanceof Valiente def) {
+//            Equipable escudo = new DaoEquipable().buscarPorTipo(def.getEscudo());
+//            int poderEscudo = (escudo!=null) ? escudo.getPoder() : 0;
+//            if (random < (ata.getHabilidad() - (def.getDefensa() + poderEscudo))) {
+//                exito = true;
+//            }
+//        }
+//        return exito;
+//    }
+
+    //Para calcular % acierto usa formula % = base_hit + %diferencia * ( ata.habilidad - ( def.defensa + escudo.poder ))
+        public static boolean ataqueExitoso(Object atacante, Object defensor) {
         boolean exito = false;
-        int random = (int) (Math.random() * 101);
+        double probAcierto;
+        int probMinima = (int) (Math.random() * 101);
         if (atacante instanceof Valiente ata && defensor instanceof Monstruo def) {
-            if (random < (ata.getHabilidad() - def.getDefensa())) {
+            probAcierto = BASE_HIT + DIFICULTAD * (ata.getHabilidad() - (def.getDefensa()));
+            if (probAcierto>probMinima) {
                 exito = true;
             }
         } else if (atacante instanceof Monstruo ata && defensor instanceof Valiente def) {
             Equipable escudo = new DaoEquipable().buscarPorTipo(def.getEscudo());
             int poderEscudo = (escudo!=null) ? escudo.getPoder() : 0;
-            if (random < (ata.getHabilidad() - (def.getDefensa() + poderEscudo))) {
+            probAcierto = BASE_HIT + DIFICULTAD * (ata.getHabilidad() - (def.getDefensa()+poderEscudo));
+            if (probAcierto>probMinima) {
                 exito = true;
             }
         }

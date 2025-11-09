@@ -11,10 +11,10 @@ public class Main {
     public static void main(String[] args) {
 
         DaoMonstruo daom = new DaoMonstruo();
-        Monstruo m = daom.buscarPorTipo("DRAGON_ROJO");
+        Monstruo m = daom.buscarPorTipo("DEVORADOR_INTELECTOS".toUpperCase());
 
         DaoValiente daov = new DaoValiente();
-        Valiente v = daov.buscarPorTipo("guerrero".toUpperCase());
+        Valiente v = daov.buscarPorTipo("paladin".toUpperCase());
 
 
         System.out.println();
