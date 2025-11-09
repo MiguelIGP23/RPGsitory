@@ -14,7 +14,7 @@ public class Combate {
     public static final double DIFICULTAD = 3.0;        //más valor -> más diferencia entre niveles para % golpeo
 
 
-    //Inicia bucle de combate entre valiente y monstruo, termina cuando uno muere
+    //Iniciar bucle de combate entre valiente y monstruo, termina cuando uno muere
     public static void iniciarCombate(Valiente valiente, Monstruo monstruo) {
         System.out.println("*** Apareció un " + monstruo.getTipoMonstruo() + "!***\n");
         while (!valiente.getMuerto() && !monstruo.getMuerto()) {
