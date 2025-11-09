@@ -25,7 +25,8 @@ public class Monstruo {
 
     public Monstruo(TiposMonstruo tipo, int vida, int fuerza, int defensa, int habilidad, int velocidad) {
         double lvl = Math.random() * 10;
-        this.nivel = ( lvl < 1) ? 1 : ((int) lvl);
+//        this.nivel = ( lvl < 1) ? 1 : ((int) lvl);
+        this.nivel=1;
 
         this.tipoMonstruo = tipo;
         this.vida = (int) (vida + (vida * 0.15 * (nivel - 1)));
@@ -115,7 +116,7 @@ public class Monstruo {
         } else {
             this.vida -= dano;
         }
-        System.out.printf("%s pierde %d de vida\n", tipoMonstruo, dano);
+        System.out.printf("-%s pierde %d de vida\n", tipoMonstruo, dano);
         return this.muerto;
     }
 

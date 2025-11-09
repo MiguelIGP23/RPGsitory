@@ -54,17 +54,11 @@ public class Valiente {
 
 
     //Metodos get
-    public TiposValiente getTipoValiente() {
-        return tipoValiente;
-    }
+    public TiposValiente getTipoValiente() {return tipoValiente;}
 
-    public int getVida() {
-        return vida;
-    }
+    public int getVida() {return vida;}
 
-    public int getDefensa() {
-        return defensa;
-    }
+    public int getDefensa() {return defensa;}
 
     public int getVelocidad() {
         return velocidad;
@@ -82,11 +76,15 @@ public class Valiente {
         return escudo;
     }
 
-    //Metodos set
+
+    //Métodos set
+    public void setDefensa(int defensa) {this.defensa = defensa;}
 
     public void setArma(String arma) {
         this.arma = arma;
     }
+
+    public void setEscudo(String escudo) {this.escudo = escudo;}
 
 
     //Metodo toString
@@ -137,7 +135,7 @@ public class Valiente {
         } else {
             this.vida -= cantidad;
         }
-        System.out.printf("%s pierde %d de vida\n", tipoValiente, cantidad);
+        System.out.printf("-%s pierde %d de vida\n", tipoValiente, cantidad);
         return this.muerto;
     }
 
@@ -147,21 +145,22 @@ public class Valiente {
             case GUERRERO -> {
                 //Golpe fuerte daño extra
                 int danoExtra = Math.round(fuerza * DANO_HAB_GUERRERO);
-                System.out.println(tipoValiente + " utilizó Carga Asesina!\n");
+                System.out.println("-"+tipoValiente + " utilizó Carga Asesina!\n");
                 atacar(enemigo, danoExtra);
             }
             case PALADIN -> {
                 //Golpe flojo y aumenta defensa
                 int danoExtra = Math.round(fuerza * (DANO_HAB_PALADIN-1));
-                System.out.println(tipoValiente + " utilizó Armadura Sacra!");
+                System.out.println("-"+tipoValiente + " utilizó Armadura Sacra!");
                 atacar(enemigo, danoExtra);
                 this.defensa += Math.round(defensa*AUMENTO_DEFENSA_PALADIN);
-                System.out.println("Defensa de " + tipoValiente + " aumentada 40%\n");
+                this.buff=true;
+                System.out.println("Defensa de " + tipoValiente + " aumentada 40%");
             }
             case MAGO -> {
                 //Golpe flojo y baja ataque
                 int danoExtra = Math.round(fuerza * (DANO_HAB_MAGO-1));
-                System.out.println(tipoValiente + " utilizo Bola de Escarcha!");
+                System.out.println("-"+tipoValiente + " utilizo Bola de Escarcha!");
                 atacar(enemigo, danoExtra);
                 int ataqueReducido = Math.round(enemigo.getFuerza() * (REDUCCION_ATAQUE_MAGO-1));
                 enemigo.setFuerza(ataqueReducido);
@@ -170,7 +169,7 @@ public class Valiente {
             case PICARO -> {
                 //Golpe flojo y aplica veneno
                 int danoExtra = Math.round(fuerza * (DANO_HAB_PICARO-1));
-                System.out.println(tipoValiente + " utilizó Colmillo Podrido!");
+                System.out.println("-"+tipoValiente + " utilizó Colmillo Podrido!");
                 atacar(enemigo, danoExtra);
                 if(!enemigo.getEnvenenado()) {
                     enemigo.cambiarEstadoVeneno(true);

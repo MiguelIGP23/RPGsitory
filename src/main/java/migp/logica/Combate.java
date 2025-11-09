@@ -4,6 +4,7 @@ import migp.datos.datosJuego.DaoEquipable;
 import migp.modelo.Equipable;
 import migp.modelo.Monstruo;
 import migp.modelo.Valiente;
+import migp.modelo.enums.TiposValiente;
 
 import java.util.Scanner;
 
@@ -18,18 +19,25 @@ public class Combate {
 
     //Iniciar bucle de combate entre valiente y monstruo, termina cuando uno muere
     public static void iniciarCombate(Valiente valiente, Monstruo monstruo) {
-        System.out.println("*** Apareció un " + monstruo.getTipoMonstruo() + "!***\n");
+        //Guarda y restaura defensa del paladin al final del combate
+        System.out.println(valiente);
+        System.out.println(monstruo);
+        int defensaInicial = valiente.getDefensa();
+        System.out.println("*** Apareció un " + monstruo.getTipoMonstruo() + "!***");
         turnoCombate=1;
         while (!valiente.getMuerto() && !monstruo.getMuerto()) {
-//            System.out.println(valiente.toString());
-//            System.out.println(monstruo.toString()+"\n");
             turno(valiente, monstruo);
             turnoCombate++;
         }
         if (valiente.getMuerto()){
             System.out.println("\n\t\txxx HAS MUERTO xxx");
+            System.out.println(valiente);
+            valiente.setDefensa(defensaInicial);
+
         }else {
             System.out.println("\n\t\t-- VICTORIA --");
+            System.out.println(valiente);
+            valiente.setDefensa(defensaInicial);
             valiente.subirNivel();
         }
 
@@ -50,7 +58,7 @@ public class Combate {
         double iniVal = iniciativa(valiente);
         double iniMon = iniciativa(monstruo);
         //Recoge opcion menu antes de empezar ataques
-        System.out.printf("\n\n\t\tTURNO %d\n1.Ataque   2.Usar habilidad\n", turnoCombate);
+        System.out.printf("\n\t\tTURNO %d\n1.Ataque   2.Usar habilidad\n", turnoCombate);
         int opcion = new Scanner(System.in).nextInt();
         System.out.println();
         if (iniMon > iniVal) {
@@ -58,26 +66,26 @@ public class Combate {
                 monstruo.atacar(valiente);
 
             } else {
-                System.out.println(monstruo.getTipoMonstruo() + " falló el ataque!");
+                System.out.println("-"+monstruo.getTipoMonstruo() + " falló el ataque!");
             }
             if (!valiente.getMuerto()) {
                 if (ataqueExitoso(valiente, monstruo)) {
                     opcionesCombate(valiente, monstruo, opcion);
                 } else {
-                    System.out.println(valiente.getTipoValiente() + " tu ataque falló!");
+                    System.out.println("-"+valiente.getTipoValiente() + " tu ataque falló!");
                 }
             }
         } else {
             if (ataqueExitoso(valiente, monstruo)) {
                 opcionesCombate(valiente, monstruo, opcion);
             }else {
-                System.out.println(valiente.getTipoValiente() + " tu ataque falló!");
+                System.out.println("-"+valiente.getTipoValiente() + " tu ataque falló!");
             }
             if (!monstruo.getMuerto()) {
                 if (ataqueExitoso(monstruo, valiente)) {
                     monstruo.atacar(valiente);
                 }else{
-                    System.out.println(monstruo.getTipoMonstruo() + " falló el ataque!");
+                    System.out.println("-"+monstruo.getTipoMonstruo() + " falló el ataque!");
                 }
             }
         }
