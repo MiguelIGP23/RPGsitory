@@ -38,8 +38,7 @@ public class DaoMonstruo implements InterfazDao<Monstruo,String>{
                             rs.getInt(3),
                             rs.getInt(4),
                             rs.getInt(5),
-                            rs.getInt(6),
-                            rs.getInt(7)
+                            rs.getInt(6)
                     );
                 }
             }
