@@ -25,8 +25,8 @@ public class Monstruo {
 
     public Monstruo(TiposMonstruo tipo, int vida, int fuerza, int defensa, int habilidad, int velocidad) {
         double lvl = Math.random() * 10;
-//        this.nivel = ( lvl < 1) ? 1 : ((int) lvl);
-        this.nivel=1;
+        this.nivel = ( lvl < 1) ? 1 : ((int) lvl);
+//        this.nivel=1;
 
         this.tipoMonstruo = tipo;
         this.vida = (int) (vida + (vida * 0.15 * (nivel - 1)));
