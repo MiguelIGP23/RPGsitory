@@ -153,7 +153,7 @@ public class Valiente {
             case PALADIN -> {
                 //Golpe flojo y aumenta defensa
                 int danoExtra = Math.round(fuerza * (DANO_HAB_PALADIN-1));
-                System.out.println(tipoValiente + " utilizó Armadura Sacra!\n");
+                System.out.println(tipoValiente + " utilizó Armadura Sacra!");
                 atacar(enemigo, danoExtra);
                 this.defensa += Math.round(defensa*AUMENTO_DEFENSA_PALADIN);
                 System.out.println("Defensa de " + tipoValiente + " aumentada 40%\n");
@@ -161,7 +161,7 @@ public class Valiente {
             case MAGO -> {
                 //Golpe flojo y baja ataque
                 int danoExtra = Math.round(fuerza * (DANO_HAB_MAGO-1));
-                System.out.println(tipoValiente + " utilizo Bola de Escarcha!\n");
+                System.out.println(tipoValiente + " utilizo Bola de Escarcha!");
                 atacar(enemigo, danoExtra);
                 int ataqueReducido = Math.round(enemigo.getFuerza() * (REDUCCION_ATAQUE_MAGO-1));
                 enemigo.setFuerza(ataqueReducido);
@@ -170,7 +170,7 @@ public class Valiente {
             case PICARO -> {
                 //Golpe flojo y aplica veneno
                 int danoExtra = Math.round(fuerza * (DANO_HAB_PICARO-1));
-                System.out.println(tipoValiente + " utilizó Colmillo Podrido!\n");
+                System.out.println(tipoValiente + " utilizó Colmillo Podrido!");
                 atacar(enemigo, danoExtra);
                 if(!enemigo.getEnvenenado()) {
                     enemigo.cambiarEstadoVeneno(true);
@@ -200,5 +200,6 @@ public class Valiente {
         this.defensa++;
         this.habilidad++;
         this.velocidad++;
+        System.out.println(this.toString());
     }
 }

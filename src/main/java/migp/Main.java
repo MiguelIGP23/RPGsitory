@@ -11,17 +11,15 @@ public class Main {
     public static void main(String[] args) {
 
         DaoMonstruo daom = new DaoMonstruo();
-        Monstruo m = daom.buscarPorTipo("DEVORADOR_INTELECTOS".toUpperCase());
+        Monstruo m = daom.buscarPorTipo("almeja_gigante".toUpperCase());
 
         DaoValiente daov = new DaoValiente();
         Valiente v = daov.buscarPorTipo("paladin".toUpperCase());
 
 
         System.out.println();
-        v.setArma("DAGA");
+//        v.setArma("DAGA");
 //        v.setEscudo("ESCUDO_DE_HIERRO");
         Combate.iniciarCombate(v, m);
-        System.out.println(v);
-        System.out.println(m);
     }
 }
