@@ -23,7 +23,7 @@ public class Combate {
         System.out.println(valiente);
         System.out.println(monstruo);
         int defensaInicial = valiente.getDefensa();
-        System.out.println("*** Apareció un " + monstruo.getTipoMonstruo() + "!***");
+        System.out.println("*** Apareció un " + monstruo.getTipoMonstruo() + " nivel "+monstruo.getNivel()+"!***");
         turnoCombate=1;
         while (!valiente.getMuerto() && !monstruo.getMuerto()) {
             turno(valiente, monstruo);

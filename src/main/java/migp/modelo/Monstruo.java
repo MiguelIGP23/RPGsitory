@@ -62,6 +62,8 @@ public class Monstruo {
         return velocidad;
     }
 
+    public int getNivel() {return nivel;}
+
     public boolean getMuerto() {
         return muerto;
     }

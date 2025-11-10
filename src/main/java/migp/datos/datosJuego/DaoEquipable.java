@@ -14,6 +14,8 @@ public class DaoEquipable implements InterfazDao<Equipable, String> {
 
     Connection con = ConexionBaseDatos.getInstance().getConnection();
 
+    public Connection getCon() {return con;}
+
     @Override
     public List<Equipable> listar() {
         ArrayList<Equipable> lista = new ArrayList<>();

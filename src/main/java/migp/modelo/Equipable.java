@@ -6,7 +6,7 @@ public class Equipable {
 
     private String nombre;
     private TiposEquipable tipo;
-    private int poder;      //implica daño hecho o daño resistido
+    private int poder;      //implica daño hecho, resistido o hp curado
 
     public Equipable(String nombre,TiposEquipable tipo,  int poder){
         this.nombre=nombre;
@@ -28,10 +28,6 @@ public class Equipable {
 
     @Override
     public String toString() {
-        return "Equipable{" +
-                ", nombre='" + nombre + '\'' +
-                "tipo=" + tipo +
-                ", poder=" + poder +
-                '}';
+        return this.nombre +" "+ nombre+", poder=" + poder;
     }
 }

@@ -1,5 +1,7 @@
 package migp.datos.datosJuego;
 
+import migp.datos.persistencia.TempDatabase;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -12,21 +14,31 @@ public class ConexionBaseDatos {
     private ConexionBaseDatos() {
         try {
             String db = "rpg.db";
-            connection = DriverManager.getConnection("jdbc:sqlite:src/main/resources/"+db);
-            System.out.println("Conectado a BD: "+db+"\n\n");
+            connection = DriverManager.getConnection("jdbc:sqlite:" + TempDatabase.getTempDBPath());
+            System.out.println("Conectado a BD: " + db + "\n\n");
         } catch (SQLException e) {
-            System.out.println("ERROR: " + e.getMessage() + "\nERROR_CODE " + e.getErrorCode() + "\nSQL_STATE " + e.getSQLState());
+            InterfazDao.mostrarErrores(e);
         }
     }
 
-    public static synchronized ConexionBaseDatos getInstance(){
-        if (instance==null){
-            instance=new ConexionBaseDatos();
+    public static synchronized ConexionBaseDatos getInstance() {
+        if (instance == null) {
+            instance = new ConexionBaseDatos();
         }
         return instance;
     }
 
-    public Connection getConnection(){
+    public Connection getConnection() {
         return connection;
+    }
+
+    public void cerrar() {
+        try {
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            InterfazDao.mostrarErrores(e);
+        }
     }
 }
