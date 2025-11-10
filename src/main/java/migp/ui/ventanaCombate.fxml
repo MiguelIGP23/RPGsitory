@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+
+
+<Label prefHeight="83.0" prefWidth="380.0" text="Prueba java FX + Scene Builder" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" />
