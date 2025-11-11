@@ -10,7 +10,9 @@ public class MainUI extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         //Indica ruta del FXML principal (ventana principal)
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/migp/ui/ventanaCombate.fxml"));
+        System.out.println(getClass().getResource("src/main/resources/ventanaCombate.fxml"));
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("src/main/resources/ventanaCombate.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Pantalla Prinncipal");
         stage.setScene(scene);
