@@ -24,8 +24,9 @@ public class Valiente {
     private int defensa;
     private int habilidad;
     private int velocidad;
-    private String arma;
-    private String escudo;
+    private ArrayList<Equipable> inventario= new ArrayList<>();
+    private Equipable arma;
+    private Equipable escudo;
     private int nivel;
 
     private boolean muerto;
@@ -34,7 +35,7 @@ public class Valiente {
 
     private List<Monstruo> victorias;       //Guarda historial de monstruos derrotados
 
-    public Valiente(TiposValiente tipoValiente, int vida, int fuerza, int defensa, int habilidad, int velocidad, String arma, String escudo, int nivel) {
+    public Valiente(TiposValiente tipoValiente, int vida, int fuerza, int defensa, int habilidad, int velocidad, Equipable arma, Equipable escudo, int nivel) {
         this.tipoValiente = tipoValiente;
         this.vida = vida;
         this.fuerza = fuerza;
@@ -72,7 +73,7 @@ public class Valiente {
         return muerto;
     }
 
-    public String getEscudo() {
+    public Equipable getEscudo() {
         return escudo;
     }
 
@@ -80,11 +81,11 @@ public class Valiente {
     //Métodos set
     public void setDefensa(int defensa) {this.defensa = defensa;}
 
-    public void setArma(String arma) {
+    public void setArma(Equipable arma) {
         this.arma = arma;
     }
 
-    public void setEscudo(String escudo) {this.escudo = escudo;}
+    public void setEscudo(Equipable escudo) {this.escudo = escudo;}
 
 
     //Metodo toString
@@ -97,17 +98,17 @@ public class Valiente {
                 ", Defensa: " + defensa +
                 ", Habilidad: " + habilidad +
                 ", Velocidad: " + velocidad +
-                ", Arma: " + arma +
-                ", Escudo: " + escudo
+                ", Arma: " + arma.getNombre() +
+                ", Escudo: " + escudo.getNombre()
                 ;
     }
 
 
     //Quita bonus poder escudo actual y suma bonus poder escudo nuevo
-    public void equiparEscudo(String escudo) {
+    public void equiparEscudo(Equipable escudo) {
         DaoEquipable dao = new DaoEquipable();
-        Equipable escudoActual = dao.buscarPorTipo(this.escudo);
-        Equipable escudoNuevo = dao.buscarPorTipo(escudo);
+        Equipable escudoActual = dao.buscarPorTipo(this.escudo.getNombre());
+        Equipable escudoNuevo = dao.buscarPorTipo(escudo.getNombre());
         this.escudo = escudo;
         if(escudoActual!=null) {
             this.defensa -= escudoActual.getPoder();
@@ -120,7 +121,7 @@ public class Valiente {
         //Vida-(fuerza+poderArma)
         int ataque = fuerza + danoExtra;
         DaoEquipable dao = new DaoEquipable();
-        Equipable arma = dao.buscarPorTipo(this.arma);
+        Equipable arma = dao.buscarPorTipo(this.arma.getNombre());
         if (arma != null) {
             ataque += arma.getPoder();
         }

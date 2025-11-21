@@ -11,8 +11,8 @@ import java.util.Scanner;
 public class Combate {
 
     //Atributos de clase para ajustar % de golpe
-    public static final int BASE_HIT = 70;              //% de golpe si atk=def+esc
-    public static final double DIFICULTAD = 3.0;        //más valor -> más diferencia entre niveles para % golpeo
+    public static final int BASE_HIT = 70;              //% de golpe medio ( si atk=def+esc )
+    public static final double DIFICULTAD = 3.0;        //más valor -> meyor diferencia de %golpe por diferencia de nivel
 
     public static int turnoCombate;
 
@@ -43,6 +43,7 @@ public class Combate {
 
     }
 
+    //Cuando se añadan opciones, añadir en este switch y en el sout del metodo turno() de debajo
     private static void opcionesCombate(Valiente valiente, Monstruo monstruo, int opcion) {
         switch (opcion) {
             case 1 -> valiente.atacar(monstruo, 0);
@@ -64,7 +65,6 @@ public class Combate {
         if (iniMon > iniVal) {
             if (ataqueExitoso(monstruo, valiente)) {
                 monstruo.atacar(valiente);
-
             } else {
                 System.out.println("-"+monstruo.getTipoMonstruo() + " falló el ataque!");
             }
@@ -125,6 +125,7 @@ public class Combate {
 //    }
 
     //Para calcular % acierto usa formula % = base_hit + %diferencia * ( ata.habilidad - ( def.defensa + escudo.poder ))
+    //Después lanza número entre 1 y 100, y si probabilidad es mayor que número aleatorio ataque es exitoso
         public static boolean ataqueExitoso(Object atacante, Object defensor) {
         boolean exito = false;
         double probAcierto;
@@ -136,7 +137,7 @@ public class Combate {
                 exito = true;
             }
         } else if (atacante instanceof Monstruo ata && defensor instanceof Valiente def) {
-            Equipable escudo = new DaoEquipable().buscarPorTipo(def.getEscudo());
+            Equipable escudo = new DaoEquipable().buscarPorTipo(def.getEscudo().getNombre());
             int poderEscudo = (escudo!=null) ? escudo.getPoder() : 0;
             probAcierto = BASE_HIT + DIFICULTAD * (ata.getHabilidad() - (def.getDefensa()+poderEscudo));
             probMinima = (int) (Math.random() * 101);

@@ -21,8 +21,12 @@ public class Main {
         Monstruo m = daom.buscarPorTipo("almeja_gigante".toUpperCase());
 
         System.out.println();
-        v.setArma("DAGA");
-        v.setEscudo("ESCUDO_DE_HIERRO");
+
+        DaoEquipable daoe= new DaoEquipable();
+        Equipable arma = daoe.buscarPorTipo("DAGA");
+        v.setArma(arma);
+        Equipable escudo = daoe.buscarPorTipo("ESCUDO_DE_HIERRO");
+        v.setEscudo(escudo);
         Combate.iniciarCombate(v, m);
 
 

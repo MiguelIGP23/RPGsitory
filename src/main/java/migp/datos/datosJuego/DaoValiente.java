@@ -1,5 +1,6 @@
 package migp.datos.datosJuego;
 
+import migp.modelo.Equipable;
 import migp.modelo.Valiente;
 import migp.modelo.enums.TiposValiente;
 
@@ -32,6 +33,12 @@ public class DaoValiente implements InterfazDao<Valiente, String> {
             st.setString(1,id);
             try (ResultSet rs = st.executeQuery()){
                 if(rs.next()){
+                    //Cargamos arma y escudo desde la bd por sus nombres
+                    String armaNombre = rs.getString(7);
+                    String escudoNombre = rs.getString(8);
+                    Equipable arma= new DaoEquipable().buscarPorTipo(armaNombre);
+                    Equipable escudo= new DaoEquipable().buscarPorTipo(escudoNombre);
+
                     valiente= new Valiente(
                             TiposValiente.valueOf(rs.getString(1)),
                             rs.getInt(2),
@@ -39,8 +46,8 @@ public class DaoValiente implements InterfazDao<Valiente, String> {
                             rs.getInt(4),
                             rs.getInt(5),
                             rs.getInt(6),
-                            rs.getString(7),
-                            rs.getString(8),
+                            arma,
+                            escudo,
                             rs.getInt(9)
                     );
                 }
