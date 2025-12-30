@@ -94,6 +94,10 @@ public class Valiente {
         return escudo;
     }
 
+    public Inventario getInventario() {
+        return inventario;
+    }
+
 
     //Métodos set
     public void setFuerza(int fuerza) {
@@ -123,8 +127,8 @@ public class Valiente {
                 ", Defensa: " + defensa +
                 ", Habilidad: " + habilidad +
                 ", Velocidad: " + velocidad +
-                ", Arma: " + arma.getNombre() +
-                ", Escudo: " + escudo.getNombre()
+                ", Arma: " + (arma != null ? arma.getNombre() + "-" + arma.getPoder() : "-") +
+                ", Escudo: " + (escudo != null ? escudo.getNombre() + "-" + escudo.getPoder() : "-")
                 ;
     }
 
@@ -219,8 +223,8 @@ public class Valiente {
     // Elimina un objeto del inventario y lo desequipa si estuviera equipado
     public void eliminarObjeto(Equipable eliminado, int cantidad) {
         if (eliminado == null || cantidad <= 0) return;
-        boolean enInventario= inventario.getItems().stream().anyMatch(item -> item.getEquipable().getNombre().equalsIgnoreCase(eliminado.getNombre()));
-        if(!enInventario) return;
+        boolean enInventario = inventario.getItems().stream().anyMatch(item -> item.getEquipable().getNombre().equalsIgnoreCase(eliminado.getNombre()));
+        if (!enInventario) return;
         int restantes = inventario.eliminarItem(eliminado, cantidad);
         String objEliminado = eliminado.getNombre();
         if (restantes <= 0) {
@@ -239,10 +243,9 @@ public class Valiente {
     //Ataca a monstruo
     public void atacar(Monstruo enemigo, int danoExtra) {
         //Vida-(fuerza+poderArma)
-        int ataque = fuerza + danoExtra;
-        DaoEquipable dao = new DaoEquipable();
-        Equipable arma = dao.buscarPorTipo(this.arma.getNombre());
-        if (arma != null) {
+        int ataque = this.fuerza + danoExtra;
+        if (this.arma != null) {
+            Equipable arma = daoEquipable.buscarPorTipo(this.arma.getNombre());
             ataque += arma.getPoder();
         }
         enemigo.recibirDaño(ataque);

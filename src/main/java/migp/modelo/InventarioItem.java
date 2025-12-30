@@ -25,4 +25,9 @@ public class InventarioItem {
     }
 
     public void setCantidad(int cantidad) {this.cantidad = cantidad;}
+
+    @Override
+    public String toString() {
+        return equipable.getNombre() + ": "+ cantidad;
+    }
 }

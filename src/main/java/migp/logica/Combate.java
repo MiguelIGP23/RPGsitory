@@ -19,11 +19,11 @@ public class Combate {
     //Iniciar bucle de combate entre valiente y monstruo, termina cuando uno muere
     public static void iniciarCombate(Valiente valiente, Monstruo monstruo) {
         //Guarda y restaura atributos del jugador al final del combate
-        System.out.println(valiente);
-        System.out.println(monstruo);
         int fuerzaInicial = valiente.getFuerza();
         int defensaInicial = valiente.getDefensa();
-        System.out.println("*** Apareció un " + monstruo.getTipoMonstruo() + " nivel "+monstruo.getNivel()+"!***");
+        System.out.println("***  Apareció un " + monstruo.getTipoMonstruo() + " nivel "+monstruo.getNivel()+"!  ***\n");
+        System.out.println(valiente);
+        System.out.println(monstruo);
         turnoCombate=1;
         while (!valiente.getMuerto() && !monstruo.getMuerto()) {
             turno(valiente, monstruo);
@@ -46,6 +46,9 @@ public class Combate {
         switch (opcion) {
             case 1 -> valiente.atacar(monstruo, 0);
             case 2 -> valiente.usarHabilidadEspecial(monstruo);
+            case 3 -> {
+
+            }
             default -> System.out.println("Opción de turno no valida");
         }
     }
@@ -57,35 +60,34 @@ public class Combate {
         double iniVal = iniciativa(valiente);
         double iniMon = iniciativa(monstruo);
         //Recoge opcion menu antes de empezar ataques
-        System.out.printf("\n\t\tTURNO %d\n1.Ataque   2.Usar habilidad\n", turnoCombate);
+        System.out.printf("\n\t\tTURNO %d\n1.Ataque   2.Usar habilidad   3.Usar objeto\n", turnoCombate);
         int opcion = new Scanner(System.in).nextInt();
+
         System.out.println();
-        if (iniMon > iniVal) {
-            if (ataqueExitoso(monstruo, valiente)) {
-                monstruo.atacar(valiente);
-            } else {
-                System.out.println("--"+monstruo.getTipoMonstruo() + " falló el ataque!");
-            }
-            if (!valiente.getMuerto()) {
-                if (ataqueExitoso(valiente, monstruo)) {
-                    opcionesCombate(valiente, monstruo, opcion);
-                } else {
-                    System.out.println("--"+valiente.getTipoValiente() + " tu ataque falló!");
-                }
-            }
+
+        boolean monstruoPrimero = iniMon > iniVal;
+
+        if (monstruoPrimero) {
+            // Turno monstruo
+            if (ataqueExitoso(monstruo, valiente)) monstruo.atacar(valiente);
+            else System.out.println("--" + monstruo.getTipoMonstruo() + " falló el ataque!");
+
+            if (valiente.getMuerto()) return;
+
+            // Turno valiente
+            if (ataqueExitoso(valiente, monstruo)) opcionesCombate(valiente, monstruo, opcion);
+            else System.out.println("--" + valiente.getTipoValiente() + " tu ataque falló!");
+
         } else {
-            if (ataqueExitoso(valiente, monstruo)) {
-                opcionesCombate(valiente, monstruo, opcion);
-            }else {
-                System.out.println("-"+valiente.getTipoValiente() + " tu ataque falló!");
-            }
-            if (!monstruo.getMuerto()) {
-                if (ataqueExitoso(monstruo, valiente)) {
-                    monstruo.atacar(valiente);
-                }else{
-                    System.out.println("-"+monstruo.getTipoMonstruo() + " falló el ataque!");
-                }
-            }
+            // Turno valiente
+            if (ataqueExitoso(valiente, monstruo)) opcionesCombate(valiente, monstruo, opcion);
+            else System.out.println("-" + valiente.getTipoValiente() + " tu ataque falló!");
+
+            if (monstruo.getMuerto()) return;
+
+            // Turno monstruo
+            if (ataqueExitoso(monstruo, valiente)) monstruo.atacar(valiente);
+            else System.out.println("-" + monstruo.getTipoMonstruo() + " falló el ataque!");
         }
         System.out.println("\n-HP "+valiente.getTipoValiente()+": "+valiente.getVida());
         System.out.println("-HP "+monstruo.getTipoMonstruo()+": "+monstruo.getVida());
@@ -135,7 +137,7 @@ public class Combate {
                 exito = true;
             }
         } else if (atacante instanceof Monstruo ata && defensor instanceof Valiente def) {
-            Equipable escudo = new DaoEquipable().buscarPorTipo(def.getEscudo().getNombre());
+            Equipable escudo = def.getEscudo();
             int poderEscudo = (escudo!=null) ? escudo.getPoder() : 0;
             probAcierto = BASE_HIT + DIFICULTAD * (ata.getHabilidad() - (def.getDefensa()+poderEscudo));
             probMinima = (int) (Math.random() * 101);
