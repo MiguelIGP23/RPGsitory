@@ -1,4 +1,4 @@
-package migp.datos.datosJuego;
+package migp.persistencia;
 
 import migp.modelo.Monstruo;
 import migp.modelo.enums.TiposMonstruo;

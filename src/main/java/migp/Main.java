@@ -1,15 +1,14 @@
 package migp;
 
 
-import migp.datos.datosJuego.ConexionBaseDatos;
-import migp.datos.datosJuego.DaoEquipable;
-import migp.datos.persistencia.TempDatabase;
+import migp.persistencia.ConexionBaseDatos;
+import migp.persistencia.DaoEquipable;
 import migp.logica.Combate;
 import migp.modelo.Equipable;
 import migp.modelo.Monstruo;
 import migp.modelo.Valiente;
-import migp.datos.datosJuego.DaoMonstruo;
-import migp.datos.datosJuego.DaoValiente;
+import migp.persistencia.DaoMonstruo;
+import migp.persistencia.DaoValiente;
 
 public class Main {
     public static void main(String[] args) {

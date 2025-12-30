@@ -1,10 +1,9 @@
 package migp.logica;
 
-import migp.datos.datosJuego.DaoEquipable;
+import migp.persistencia.DaoEquipable;
 import migp.modelo.Equipable;
 import migp.modelo.Monstruo;
 import migp.modelo.Valiente;
-import migp.modelo.enums.TiposValiente;
 
 import java.util.Scanner;
 
@@ -19,9 +18,10 @@ public class Combate {
 
     //Iniciar bucle de combate entre valiente y monstruo, termina cuando uno muere
     public static void iniciarCombate(Valiente valiente, Monstruo monstruo) {
-        //Guarda y restaura defensa del paladin al final del combate
+        //Guarda y restaura atributos del jugador al final del combate
         System.out.println(valiente);
         System.out.println(monstruo);
+        int fuerzaInicial = valiente.getFuerza();
         int defensaInicial = valiente.getDefensa();
         System.out.println("*** Apareció un " + monstruo.getTipoMonstruo() + " nivel "+monstruo.getNivel()+"!***");
         turnoCombate=1;
@@ -31,12 +31,10 @@ public class Combate {
         }
         if (valiente.getMuerto()){
             System.out.println("\n\t\txxx HAS MUERTO xxx");
-            System.out.println(valiente);
-            valiente.setDefensa(defensaInicial);
-
         }else {
             System.out.println("\n\t\t-- VICTORIA --");
             System.out.println(valiente);
+            valiente.setFuerza(fuerzaInicial);
             valiente.setDefensa(defensaInicial);
             valiente.subirNivel();
         }
@@ -66,13 +64,13 @@ public class Combate {
             if (ataqueExitoso(monstruo, valiente)) {
                 monstruo.atacar(valiente);
             } else {
-                System.out.println("-"+monstruo.getTipoMonstruo() + " falló el ataque!");
+                System.out.println("--"+monstruo.getTipoMonstruo() + " falló el ataque!");
             }
             if (!valiente.getMuerto()) {
                 if (ataqueExitoso(valiente, monstruo)) {
                     opcionesCombate(valiente, monstruo, opcion);
                 } else {
-                    System.out.println("-"+valiente.getTipoValiente() + " tu ataque falló!");
+                    System.out.println("--"+valiente.getTipoValiente() + " tu ataque falló!");
                 }
             }
         } else {
@@ -95,7 +93,7 @@ public class Combate {
 
 
 
-    //Calcula iniciativa en funcion de velocidad
+    //Calcula iniciativa en función de velocidad
     public static double iniciativa(Object personaje) {
         double iniciativa = 0;
         if (personaje instanceof Valiente valiente) {

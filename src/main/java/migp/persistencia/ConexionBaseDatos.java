@@ -1,6 +1,4 @@
-package migp.datos.datosJuego;
-
-import migp.datos.persistencia.TempDatabase;
+package migp.persistencia;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

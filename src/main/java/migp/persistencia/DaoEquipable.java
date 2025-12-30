@@ -1,4 +1,4 @@
-package migp.datos.datosJuego;
+package migp.persistencia;
 
 import migp.modelo.Equipable;
 import migp.modelo.enums.TiposEquipable;

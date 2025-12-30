@@ -1,6 +1,4 @@
-package migp.datos.persistencia;
-
-import migp.datos.datosJuego.InterfazDao;
+package migp.persistencia;
 
 import java.io.*;
 import java.nio.file.*;
