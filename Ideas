@@ -10,6 +10,4 @@
 
 -Implementar metodo para despues de un combate, resetear buffs/debuffs de ataque y defensa
 
--CrearDB independiente para persistencia y poder guardar partida
-        ->Crear otra conexion para esa BD con su DAO
 

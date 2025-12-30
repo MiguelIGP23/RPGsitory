@@ -1,6 +1,4 @@
-package migp.datos.datosJuego;
-
-import migp.datos.persistencia.TempDatabase;
+package migp.persistencia;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,7 +13,7 @@ public class ConexionBaseDatos {
         try {
             String db = "rpg.db";
             connection = DriverManager.getConnection("jdbc:sqlite:" + TempDatabase.getTempDBPath());
-            System.out.println("Conectado a BD: " + db + "\n\n");
+            System.out.println("Conectado a BD: " + db + "\n");
         } catch (SQLException e) {
             InterfazDao.mostrarErrores(e);
         }

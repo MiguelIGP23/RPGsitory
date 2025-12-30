@@ -1,4 +1,4 @@
-package migp.datos.datosJuego;
+package migp.persistencia;
 
 import java.sql.SQLException;
 import java.util.List;
