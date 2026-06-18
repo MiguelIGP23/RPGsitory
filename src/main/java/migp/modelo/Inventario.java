@@ -12,7 +12,7 @@ import java.util.List;
 //Esta clase implementa la lista de objetos guardados en el inventario y los métodos para su gestión
 public class Inventario {
 
-    private ArrayList<InventarioItem> listaObjetos;
+    private final ArrayList<InventarioItem> listaObjetos;
 
     public Inventario() {
         this.listaObjetos = new ArrayList<>();
@@ -21,6 +21,9 @@ public class Inventario {
 
     // Añadir objeto (si ya existe, suma cantidad)
     public void agregarItem(Equipable equipable, int cantidad) {
+        if (equipable == null || cantidad <= 0) {
+            return;
+        }
         for (InventarioItem item : listaObjetos) {
             if (item.getEquipable().getNombre().equalsIgnoreCase(equipable.getNombre())) {
                 item.setCantidad(item.getCantidad() + cantidad);
@@ -32,10 +35,16 @@ public class Inventario {
 
     // Quita 1 unidad de objeto, si llega a 0 lo elimina, si está equipado lo desequipa
     public int eliminarItem(Equipable equipable, int cantidad){
+        if (equipable == null || cantidad <= 0) {
+            return -1;
+        }
         int nuevaCantidad=0;
         for (int i = 0; i < listaObjetos.size(); i++) {
             InventarioItem item = listaObjetos.get(i);
             if (item.getEquipable().getNombre().equalsIgnoreCase(equipable.getNombre())) {
+                if (cantidad > item.getCantidad()) {
+                    return item.getCantidad();
+                }
                 nuevaCantidad = item.getCantidad() - cantidad;
                 if (nuevaCantidad <= 0) {
                     listaObjetos.remove(i);
@@ -51,7 +60,7 @@ public class Inventario {
 
     // Devuelve lista de objetos
     public List<InventarioItem> getItems() {
-        return listaObjetos;
+        return List.copyOf(listaObjetos);
     }
 
     // Devolver solo armas
@@ -87,4 +96,3 @@ public class Inventario {
         return consumibles;
     }
 }
-

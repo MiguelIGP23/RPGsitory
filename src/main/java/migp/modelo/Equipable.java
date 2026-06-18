@@ -28,6 +28,6 @@ public class Equipable {
 
     @Override
     public String toString() {
-        return this.nombre +" "+ nombre+", poder=" + poder;
+        return nombre + ", poder=" + poder;
     }
 }

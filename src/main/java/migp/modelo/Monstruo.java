@@ -98,28 +98,42 @@ public class Monstruo {
 
     //Ataca a valiente
     public void atacar(Valiente valiente) {
+        int vidaInicialValiente = valiente.getVida();
         valiente.recibirDano(fuerza);
+        int danoReal = vidaInicialValiente - valiente.getVida();
+        System.out.println("-" + tipoMonstruo + " ataca, " + valiente.getTipoValiente() + " pierde " + danoReal + " de vida");
     }
 
     //Recibe daño de valiente
-    //Si esta envenenado, aplica daño veneno, reduce contador y quita veneno al llegar a 0
+    //Aplica solo el daño del golpe recibido
     public boolean recibirDaño(int cantidad) {
-        int dano = cantidad;
-        if (envenenado) {
-            dano += DANO_VENENO;
-            if ((contadorVeneno--) == 0) {
-                cambiarEstadoVeneno(false);
-                System.out.println(tipoMonstruo + " ya no esta envenenado");
-            }
-        }
-        if (this.vida - dano <= 0) {
+        if (this.vida - cantidad <= 0) {
             this.vida = 0;
             this.muerto = true;
         } else {
-            this.vida -= dano;
+            this.vida -= cantidad;
         }
-        System.out.printf("-%s pierde %d de vida\n", tipoMonstruo, dano);
         return this.muerto;
+    }
+
+    //Aplica el daño del veneno al final del golpe si el monstruo está envenenado
+    public void aplicarVeneno() {
+        if (!envenenado || muerto) {
+            return;
+        }
+
+        int danoVeneno = Math.min(DANO_VENENO, vida);
+        vida -= danoVeneno;
+        if (vida <= 0) {
+            vida = 0;
+            muerto = true;
+        }
+        System.out.println("-" + tipoMonstruo + " pierde " + danoVeneno + " de vida por veneno");
+
+        if ((contadorVeneno--) == 0) {
+            cambiarEstadoVeneno(false);
+            System.out.println(tipoMonstruo + " ya no esta envenenado");
+        }
     }
 
     //Si recibe true, cambia envenado a true e inicia contador 3 turnos veneno

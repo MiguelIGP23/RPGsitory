@@ -1,7 +1,6 @@
 package migp.modelo;
 
 import migp.modelo.enums.TiposValiente;
-import migp.persistencia.DaoEquipable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +15,7 @@ public class Valiente {
 
     public static final float AUMENTO_DEFENSA_PALADIN = 0.40f;
     public static final float REDUCCION_ATAQUE_MAGO = 0.30f;
+    public static final int VIDA_MAXIMA = 100;
 
     //Atributos de instancia
     private TiposValiente tipoValiente;
@@ -35,18 +35,16 @@ public class Valiente {
 
     private List<Monstruo> victorias;       //Guarda historial de monstruos derrotados
 
-    DaoEquipable daoEquipable = new DaoEquipable();
-
     public Valiente(TiposValiente tipoValiente, int vida, int fuerza, int defensa, int habilidad, int velocidad, Equipable arma, Equipable escudo, int nivel) {
         this.tipoValiente = tipoValiente;
-        this.vida = vida;
+        this.vida = Math.min(vida, VIDA_MAXIMA);
         this.fuerza = fuerza;
         this.defensa = defensa;
         this.habilidad = habilidad;
         this.velocidad = velocidad;
         this.inventario = new Inventario();
-        this.arma = arma;
-        this.escudo = escudo;
+        this.arma = null;
+        this.escudo = null;
         this.nivel = nivel;
 
         this.muerto = false;
@@ -54,6 +52,15 @@ public class Valiente {
         this.contadorBuff = 0;
 
         this.victorias = new ArrayList<>();
+
+        if (arma != null) {
+            inventario.agregarItem(arma, 1);
+            equiparArma(arma);
+        }
+        if (escudo != null) {
+            inventario.agregarItem(escudo, 1);
+            equiparEscudo(escudo);
+        }
     }
 
 
@@ -146,15 +153,13 @@ public class Valiente {
         }
         List<InventarioItem> listaArmas = inventario.getArmas();
         Equipable armaInventario = null;    //Evita meter armas desde fuera, usa la del inventario
-        boolean enInventario = false;
         for (InventarioItem arma : listaArmas) {
             if (armaNueva.getNombre().equalsIgnoreCase(arma.getEquipable().getNombre())) {
-                enInventario = true;
                 armaInventario = arma.getEquipable();
                 break;
             }
         }
-        if (enInventario) {
+        if (armaInventario != null) {
             desequiparArma();
             this.arma = armaInventario;
             this.fuerza += armaInventario.getPoder();
@@ -178,15 +183,13 @@ public class Valiente {
         }
         List<InventarioItem> listaEscudos = inventario.getEscudos();
         Equipable escudoInventario = null;    //Evita meter escudos desde fuera, usa el del inventario
-        boolean enInventario = false;
         for (InventarioItem escudo : listaEscudos) {
             if (escudoNuevo.getNombre().equalsIgnoreCase(escudo.getEquipable().getNombre())) {
-                enInventario = true;
                 escudoInventario = escudo.getEquipable();
                 break;
             }
         }
-        if (enInventario) {
+        if (escudoInventario != null) {
             desequiparEscudo();
             this.escudo = escudoInventario;
             this.defensa += escudoInventario.getPoder();
@@ -203,16 +206,17 @@ public class Valiente {
     }
 
     // Usa consumible, aplica el efecto y resta del inventario
-    public void usarConsumible(Equipable usado, int cantidad) {
-        if (usado == null || cantidad <= 0) return;
+    public boolean usarConsumible(Equipable usado, int cantidad) {
+        if (usado == null || cantidad <= 0) return false;
         List<InventarioItem> listaConsumibles = inventario.getConsumibles();
         for (InventarioItem consumible : listaConsumibles) {
             if (usado.getNombre().equalsIgnoreCase(consumible.getEquipable().getNombre()) && cantidad <= consumible.getCantidad()) {
-                this.vida += (consumible.getEquipable().getPoder() * cantidad);
+                this.vida = Math.min(VIDA_MAXIMA, this.vida + (consumible.getEquipable().getPoder() * cantidad));
                 inventario.eliminarItem(consumible.getEquipable(), cantidad);
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     // Agrega un objeto al inventario
@@ -244,11 +248,10 @@ public class Valiente {
     public void atacar(Monstruo enemigo, int danoExtra) {
         //Vida-(fuerza+poderArma)
         int ataque = this.fuerza + danoExtra;
-        if (this.arma != null) {
-            Equipable arma = daoEquipable.buscarPorTipo(this.arma.getNombre());
-            ataque += arma.getPoder();
-        }
+        int vidaInicialEnemigo = enemigo.getVida();
         enemigo.recibirDaño(ataque);
+        int danoReal = vidaInicialEnemigo - enemigo.getVida();
+        System.out.println("-" + tipoValiente + " ataca, " + enemigo.getTipoMonstruo() + " pierde " + danoReal + " de vida");
     }
 
     //Recibe daño de monstruo
@@ -259,7 +262,6 @@ public class Valiente {
         } else {
             this.vida -= cantidad;
         }
-        System.out.printf("-%s pierde %d de vida\n", tipoValiente, cantidad);
         return this.muerto;
     }
 
@@ -269,36 +271,36 @@ public class Valiente {
             case GUERRERO -> {
                 //Golpe fuerte daño extra
                 int danoExtra = Math.round(fuerza * DANO_HAB_GUERRERO);
-                System.out.println(tipoValiente + " utilizó Carga Asesina!\n");
+                System.out.println(tipoValiente + " utilizó Carga Asesina!");
                 atacar(enemigo, danoExtra);
             }
             case PALADIN -> {
                 //Golpe flojo y aumenta defensa
                 int danoExtra = Math.round(fuerza * (DANO_HAB_PALADIN - 1));
-                System.out.println(tipoValiente + " utilizó Armadura Sacra!");
-                atacar(enemigo, danoExtra);
                 this.defensa += Math.round(defensa * AUMENTO_DEFENSA_PALADIN);
                 this.buff = true;
-                System.out.println("Defensa de " + tipoValiente + " aumentada 40%");
+                System.out.println(tipoValiente + " utilizó Armadura Sacra, defensa aumentada 40%!");
+                atacar(enemigo, danoExtra);
             }
             case MAGO -> {
                 //Golpe flojo y baja ataque
                 int danoExtra = Math.round(fuerza * (DANO_HAB_MAGO - 1));
-                System.out.println(tipoValiente + " utilizo Bola de Escarcha!");
-                atacar(enemigo, danoExtra);
                 int ataqueReducido = Math.round(enemigo.getFuerza() * (REDUCCION_ATAQUE_MAGO - 1));
                 enemigo.setFuerza(ataqueReducido);
-                System.out.println("Ataque " + enemigo + " reducido 30%\n");
+                System.out.println(tipoValiente + " utilizó Bola de Escarcha, ataque de " + enemigo.getTipoMonstruo() + " reducido 30%!");
+                atacar(enemigo, danoExtra);
             }
             case PICARO -> {
                 //Golpe flojo y aplica veneno
                 int danoExtra = Math.round(fuerza * (DANO_HAB_PICARO - 1));
-                System.out.println(tipoValiente + " utilizó Colmillo Podrido!");
-                atacar(enemigo, danoExtra);
-                if (!enemigo.getEnvenenado()) {
+                boolean envenenar = !enemigo.getEnvenenado();
+                if (envenenar) {
                     enemigo.cambiarEstadoVeneno(true);
-                    System.out.println(enemigo.getTipoMonstruo() + " envenenado! (6vida/turno)");
+                    System.out.println(tipoValiente + " utilizó Colmillo Podrido, " + enemigo.getTipoMonstruo() + " envenenado! (6 hp/turno)");
+                } else {
+                    System.out.println(tipoValiente + " utilizó Colmillo Podrido!");
                 }
+                atacar(enemigo, danoExtra);
             }
         }
     }
@@ -318,7 +320,7 @@ public class Valiente {
         System.out.printf("-Nivel " + nivel + " +1\t\t\t-Vida " + vida + " +10\n-Fuerza " + fuerza + " +1" +
                 "\t\t-Defensa " + defensa + " +1\n-Habilidad " + habilidad + " +1\t-Velocidad " + velocidad + " +1\n\n");
         this.nivel++;
-        this.vida += 10;
+        this.vida = Math.min(VIDA_MAXIMA, this.vida + 10);
         this.fuerza++;
         this.defensa++;
         this.habilidad++;

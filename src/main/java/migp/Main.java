@@ -17,7 +17,7 @@ public class Main {
     public static void main(String[] args) {
 
         DaoValiente daov = new DaoValiente();
-        Valiente v = daov.buscarPorTipo("paladin".toUpperCase());
+        Valiente v = daov.buscarPorTipo("picaro".toUpperCase());
 
         DaoMonstruo daom = new DaoMonstruo();
         Monstruo m = daom.buscarPorTipo("almeja_gigante".toUpperCase());
@@ -45,9 +45,18 @@ public class Main {
 //        System.out.println(v);
 
 
+
+        // Prueba de consumibles en combate
+
+        DaoEquipable daoe= new DaoEquipable();
+        Equipable consumible = daoe.buscarPorTipo("POCION");
+        v.getInventario().agregarItem(consumible, 3);
+        System.out.println("Consumibles antes del combate: " + v.getInventario().getConsumibles());
+
+
         // Prueba de combate
 
-//        Combate.iniciarCombate(v, m);
+        Combate.iniciarCombate(v, m);
 
         //Cierra conexión db importante para borrar db temporal
         ConexionBaseDatos.getInstance().cerrar();
