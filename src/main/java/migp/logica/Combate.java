@@ -10,8 +10,12 @@ import java.util.Scanner;
 public class Combate {
 
     //Atributos de clase para ajustar % de golpe
-    public static final int BASE_HIT = 70;              //% de golpe medio ( si atk=def+esc )
-    public static final double DIFICULTAD = 3.0;        //más valor -> meyor diferencia de %golpe por diferencia de nivel
+    public static final int BASE_HIT = 62;              //% de golpe medio en enfrentamiento equilibrado
+    public static final double PESO_HABILIDAD = 2.5;    //la habilidad define el control del golpe
+    public static final double PESO_EVASION = 1.5;      //la velocidad del defensor reduce algo la probabilidad
+    public static final double PESO_NIVEL = 4.0;        //el nivel influye, pero no debe decidir solo el combate
+    public static final int PROBABILIDAD_MINIMA = 20;
+    public static final int PROBABILIDAD_MAXIMA = 90;
 
     public static int turnoCombate;
     private static final Scanner SCANNER = new Scanner(System.in);
@@ -22,7 +26,7 @@ public class Combate {
         //Guarda y restaura atributos del jugador al final del combate
         int fuerzaInicial = valiente.getFuerza();
         int defensaInicial = valiente.getDefensa();
-        System.out.println(Consola.color(Consola.ANSI_AZUL, "***  Apareció un " + monstruo.getTipoMonstruo() + " nivel " + monstruo.getNivel() + "!  ***\n"));
+        System.out.println(Consola.color(Consola.ANSI_AZUL, "***  Apareció " + monstruo.getNombreMostrado() + " nivel " + monstruo.getNivel() + "!  ***\n"));
         System.out.println(Consola.color(Consola.ANSI_MAGENTA, valiente.toString()));
         System.out.println(Consola.color(Consola.ANSI_MAGENTA, monstruo.toString()));
         turnoCombate = 1;
@@ -79,7 +83,7 @@ public class Combate {
         if (monstruoPrimero) {
             // Turno monstruo
             if (ataqueExitoso(monstruo, valiente)) monstruo.atacar(valiente);
-            else System.out.println(Consola.color(Consola.ANSI_ROJO, "- " + monstruo.getTipoMonstruo() + " falló el ataque!"));
+            else System.out.println(Consola.color(Consola.ANSI_ROJO, "- " + monstruo.getNombreMostrado() + " falló el ataque!"));
 
             if (valiente.getMuerto()) return;
 
@@ -94,14 +98,14 @@ public class Combate {
 
             // Turno monstruo
             if (ataqueExitoso(monstruo, valiente)) monstruo.atacar(valiente);
-            else System.out.println(Consola.color(Consola.ANSI_ROJO, "- " + monstruo.getTipoMonstruo() + " falló el ataque!"));
+            else System.out.println(Consola.color(Consola.ANSI_ROJO, "- " + monstruo.getNombreMostrado() + " falló el ataque!"));
         }
         //El veneno se resuelve una sola vez al final del turno
         monstruo.aplicarVeneno();
         monstruo.actualizarDebuffAtaque();
         valiente.actualizarBuff();
         System.out.println(Consola.color(Consola.ANSI_MAGENTA, "\n-HP " + valiente.getTipoValiente() + ": " + valiente.getVida()));
-        System.out.println(Consola.color(Consola.ANSI_MAGENTA, "-HP " + monstruo.getTipoMonstruo() + ": " + monstruo.getVida()));
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, "-HP " + monstruo.getNombreMostrado() + ": " + monstruo.getVida()));
     }
 
 
@@ -117,26 +121,30 @@ public class Combate {
         return iniciativa;
     }
 
-    //Para calcular % acierto usa formula % = base_hit + %diferencia * ( ata.habilidad - ( def.defensa + escudo.poder ))
-    //Después lanza número entre 1 y 100, y si probabilidad es mayor que número aleatorio ataque es exitoso
+    //El acierto depende sobre todo de habilidad, un poco de evasión y también del nivel
     public static boolean ataqueExitoso(Object atacante, Object defensor) {
-        boolean exito = false;
         double probAcierto;
-        int probMinima;
+
         if (atacante instanceof Valiente ata && defensor instanceof Monstruo def) {
-            probAcierto = BASE_HIT + DIFICULTAD * (ata.getHabilidad() - (def.getDefensa()));
-            probMinima = (int) (Math.random() * 101);
-            if (probAcierto > probMinima) {
-                exito = true;
-            }
+            probAcierto = calcularProbabilidadAcierto(
+                    ata.getHabilidad(),
+                    def.getVelocidad(),
+                    ata.getNivel(),
+                    def.getNivel()
+            );
         } else if (atacante instanceof Monstruo ata && defensor instanceof Valiente def) {
-            probAcierto = BASE_HIT + DIFICULTAD * (ata.getHabilidad() - def.getDefensa());
-            probMinima = (int) (Math.random() * 101);
-            if (probAcierto > probMinima) {
-                exito = true;
-            }
+            probAcierto = calcularProbabilidadAcierto(
+                    ata.getHabilidad(),
+                    def.getVelocidad(),
+                    ata.getNivel(),
+                    def.getNivel()
+            );
+        } else {
+            return false;
         }
-        return exito;
+
+        int tirada = (int) (Math.random() * 101);
+        return probAcierto > tirada;
     }
 
     //Recoge una accion valida del jugador y permite volver atras desde consumibles
@@ -230,5 +238,18 @@ public class Combate {
 
             System.out.println(Consola.color(Consola.ANSI_ROJO, "No se pudo usar el consumible."));
         }
+    }
+
+    //Separa la fórmula para poder ajustar pesos sin tocar el flujo del combate
+    private static double calcularProbabilidadAcierto(int habilidadAtacante, int velocidadDefensor, int nivelAtacante, int nivelDefensor) {
+        double probabilidad = BASE_HIT
+                + PESO_HABILIDAD * habilidadAtacante
+                - PESO_EVASION * velocidadDefensor
+                + PESO_NIVEL * (nivelAtacante - nivelDefensor);
+        return limitarProbabilidad(probabilidad);
+    }
+
+    private static double limitarProbabilidad(double probabilidad) {
+        return Math.max(PROBABILIDAD_MINIMA, Math.min(PROBABILIDAD_MAXIMA, probabilidad));
     }
 }

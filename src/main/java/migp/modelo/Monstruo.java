@@ -6,14 +6,15 @@ import migp.modelo.enums.TiposMonstruo;
 public class Monstruo {
 
     //Atributos de clase - parámetros para ajustar daño
-    public static final int DANO_VENENO = 6;
+    public static final int DANO_VENENO = 5;
     public static final int TURNOS_VENENO = 3;
     public static final int TURNOS_DEBUFF_ATAQUE = 3;
-    public static final double SUBIDA_NIVEL =0.1;
+    public static final float MITIGACION_DEFENSA = 0.4f;
 
 
     //Atributos de instancia
     private TiposMonstruo tipoMonstruo;
+    private String nombreMostrado;
     private int vida;
     private int fuerza;
     private int defensa;
@@ -29,16 +30,36 @@ public class Monstruo {
     private int reduccionFuerzaDebuff;
 
     public Monstruo(TiposMonstruo tipo, int vida, int fuerza, int defensa, int habilidad, int velocidad) {
-        double lvl = Math.random() * 10;
-        this.nivel = ( lvl < 1) ? 1 : ((int) lvl);
-//        this.nivel=1;
+        this(tipo, vida, fuerza, defensa, habilidad, velocidad, 1);
+    }
 
+    public Monstruo(TiposMonstruo tipo, int vida, int fuerza, int defensa, int habilidad, int velocidad, int nivel) {
         this.tipoMonstruo = tipo;
-        this.vida = (int) (vida + (vida * 0.15 * (nivel - 1)));
-        this.fuerza = (int) (fuerza + (fuerza * SUBIDA_NIVEL * (nivel - 1)));
-        this.defensa = (int) (defensa + (defensa * SUBIDA_NIVEL * (nivel - 1)));
-        this.habilidad = (int) (habilidad + (habilidad * SUBIDA_NIVEL * (nivel - 1)));
-        this.velocidad = (int) (velocidad + (velocidad * SUBIDA_NIVEL * (nivel - 1)));
+        this.nombreMostrado = tipo.name();
+        this.vida = vida;
+        this.fuerza = fuerza;
+        this.defensa = defensa;
+        this.habilidad = habilidad;
+        this.velocidad = velocidad;
+        this.nivel = nivel;
+
+        this.muerto = false;
+        this.envenenado = false;
+        this.contadorVeneno = 0;
+        this.ataqueDebilitado = false;
+        this.contadorDebuffAtaque = 0;
+        this.reduccionFuerzaDebuff = 0;
+    }
+
+    public Monstruo(String nombreMostrado, int vida, int fuerza, int defensa, int habilidad, int velocidad, int nivel) {
+        this.tipoMonstruo = null;
+        this.nombreMostrado = nombreMostrado;
+        this.vida = vida;
+        this.fuerza = fuerza;
+        this.defensa = defensa;
+        this.habilidad = habilidad;
+        this.velocidad = velocidad;
+        this.nivel = nivel;
 
         this.muerto = false;
         this.envenenado = false;
@@ -52,6 +73,10 @@ public class Monstruo {
     //Metodos get
     public TiposMonstruo getTipoMonstruo() {
         return tipoMonstruo;
+    }
+
+    public String getNombreMostrado() {
+        return nombreMostrado;
     }
 
     public int getFuerza() {
@@ -110,7 +135,7 @@ public class Monstruo {
     //ToString
     @Override
     public String toString() {
-        return tipoMonstruo +
+        return nombreMostrado +
                 ", nivel=" + nivel +
                 ": vida=" + vida +
                 ", fuerza=" + fuerza +
@@ -123,14 +148,25 @@ public class Monstruo {
 
     //Ataca a valiente
     public void atacar(Valiente valiente) {
-        int vidaInicialValiente = valiente.getVida();
-        valiente.recibirDano(fuerza);
-        int danoReal = vidaInicialValiente - valiente.getVida();
-        System.out.println(Consola.color(Consola.ANSI_ROJO, "- " + tipoMonstruo + " ataca, " + valiente.getTipoValiente() + " pierde " + danoReal + " de vida"));
+        int danoReal = valiente.recibirGolpe(fuerza);
+        System.out.println(Consola.color(Consola.ANSI_ROJO, "- " + nombreMostrado + " ataca, " + valiente.getTipoValiente() + " pierde " + danoReal + " de vida"));
     }
 
     //Recibe daño de valiente
-    //Aplica solo el daño del golpe recibido
+    //Aplica mitigación por defensa y devuelve el daño real recibido
+    public int recibirGolpe(int ataqueBruto) {
+        int reduccion = Math.round(defensa * MITIGACION_DEFENSA);
+        int danoReal = Math.max(1, ataqueBruto - reduccion);
+        if (this.vida - danoReal <= 0) {
+            this.vida = 0;
+            this.muerto = true;
+        } else {
+            this.vida -= danoReal;
+        }
+        return danoReal;
+    }
+
+    //Aplica solo el daño directo que no debe mitigarse
     public boolean recibirDaño(int cantidad) {
         if (this.vida - cantidad <= 0) {
             this.vida = 0;
@@ -153,12 +189,12 @@ public class Monstruo {
             vida = 0;
             muerto = true;
         }
-        System.out.println(Consola.color(Consola.ANSI_AMARILLO, "\n-" + tipoMonstruo + " pierde " + danoVeneno + " de vida por veneno"));
+        System.out.println(Consola.color(Consola.ANSI_AMARILLO, "\n-" + nombreMostrado + " pierde " + danoVeneno + " de vida por veneno"));
 
         if ((contadorVeneno--) == 0) {
             cambiarEstadoVeneno(false);
             if (!muerto) {
-                System.out.println(Consola.color(Consola.ANSI_AMARILLO, "-" + tipoMonstruo + " ya no está envenenado."));
+                System.out.println(Consola.color(Consola.ANSI_AMARILLO, "-" + nombreMostrado + " ya no está envenenado."));
             }
         }
     }
@@ -183,7 +219,7 @@ public class Monstruo {
             fuerza += reduccionFuerzaDebuff;
             ataqueDebilitado = false;
             reduccionFuerzaDebuff = 0;
-            System.out.println(Consola.color(Consola.ANSI_AMARILLO, "-" + tipoMonstruo + " recupera su fuerza."));
+            System.out.println(Consola.color(Consola.ANSI_AMARILLO, "-" + nombreMostrado + " recupera su fuerza."));
         }
     }
 }

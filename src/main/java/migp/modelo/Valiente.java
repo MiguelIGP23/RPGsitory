@@ -9,14 +9,15 @@ import java.util.List;
 public class Valiente {
 
     //Atributos de clase - parámetros para daño de habilidades
-    public static final float DANO_HAB_GUERRERO = 1.6f;
-    public static final float DANO_HAB_PALADIN = 0.5f;
-    public static final float DANO_HAB_MAGO = 0.4f;
-    public static final float DANO_HAB_PICARO = 0.4f;
+    public static final float DANO_HAB_GUERRERO = 1.5f;
+    public static final float DANO_HAB_PALADIN = 0.6f;
+    public static final float DANO_HAB_MAGO = 0.5f;
+    public static final float DANO_HAB_PICARO = 0.5f;
 
-    public static final float AUMENTO_DEFENSA_PALADIN = 0.40f;
+    public static final float AUMENTO_DEFENSA_PALADIN = 0.25f;
     public static final int TURNOS_BUFF_PALADIN = 3;
-    public static final float REDUCCION_ATAQUE_MAGO = 0.30f;
+    public static final float REDUCCION_ATAQUE_MAGO = 0.20f;
+    public static final float MITIGACION_DEFENSA = 0.4f;
     //Atributos de instancia
     private TiposValiente tipoValiente;
     private int vida;
@@ -229,12 +230,22 @@ public class Valiente {
         List<InventarioItem> listaConsumibles = inventario.getConsumibles();
         for (InventarioItem consumible : listaConsumibles) {
             if (usado.getNombre().equalsIgnoreCase(consumible.getEquipable().getNombre()) && cantidad <= consumible.getCantidad()) {
-                this.vida = Math.min(vidaMaxima, this.vida + (consumible.getEquipable().getPoder() * cantidad));
+                curar(consumible.getEquipable().getPoder() * cantidad);
                 inventario.eliminarItem(consumible.getEquipable(), cantidad);
                 return true;
             }
         }
         return false;
+    }
+
+    //Recupera vida sin superar el máximo y devuelve la curación real aplicada
+    public int curar(int cantidad) {
+        if (cantidad <= 0 || muerto) {
+            return 0;
+        }
+        int vidaAntes = this.vida;
+        this.vida = Math.min(vidaMaxima, this.vida + cantidad);
+        return this.vida - vidaAntes;
     }
 
     // Agrega un objeto al inventario
@@ -264,12 +275,10 @@ public class Valiente {
 
     //Ataca a monstruo
     public void atacar(Monstruo enemigo, int danoExtra) {
-        //Vida-(fuerza+poderArma)
+        //El daño bruto se mitiga después según la defensa del objetivo
         int ataque = this.fuerza + danoExtra;
-        int vidaInicialEnemigo = enemigo.getVida();
-        enemigo.recibirDaño(ataque);
-        int danoReal = vidaInicialEnemigo - enemigo.getVida();
-        System.out.println(Consola.color(Consola.ANSI_VERDE, "- " + tipoValiente + " ataca, " + enemigo.getTipoMonstruo() + " pierde " + danoReal + " de vida"));
+        int danoReal = enemigo.recibirGolpe(ataque);
+        System.out.println(Consola.color(Consola.ANSI_VERDE, "- " + tipoValiente + " ataca, " + enemigo.getNombreMostrado() + " pierde " + danoReal + " de vida"));
     }
 
     //Recibe daño de monstruo
@@ -281,6 +290,14 @@ public class Valiente {
             this.vida -= cantidad;
         }
         return this.muerto;
+    }
+
+    //Recibe un golpe físico aplicando mitigación por defensa
+    public int recibirGolpe(int ataqueBruto) {
+        int reduccion = Math.round(defensa * MITIGACION_DEFENSA);
+        int danoReal = Math.max(1, ataqueBruto - reduccion);
+        recibirDano(danoReal);
+        return danoReal;
     }
 
     //Usa habilidad especial
@@ -296,7 +313,7 @@ public class Valiente {
                 //Golpe flojo y aumenta defensa
                 int danoExtra = Math.round(fuerza * (DANO_HAB_PALADIN - 1));
                 activarBuff(true);
-                System.out.println(Consola.color(Consola.ANSI_CYAN, "-" + tipoValiente + " utilizó Armadura Sacra, defensa aumentada 40%!"));
+                    System.out.println(Consola.color(Consola.ANSI_CYAN, "-" + tipoValiente + " utilizó Armadura Sacra, defensa aumentada 25%!"));
                 atacar(enemigo, danoExtra);
             }
             case MAGO -> {
@@ -304,9 +321,9 @@ public class Valiente {
                 int danoExtra = Math.round(fuerza * (DANO_HAB_MAGO - 1));
                 boolean debilitado = enemigo.aplicarDebuffAtaque(REDUCCION_ATAQUE_MAGO);
                 if (debilitado) {
-                    System.out.println(Consola.color(Consola.ANSI_CYAN, "-" + tipoValiente + " utilizó Bola de Escarcha, ataque de " + enemigo.getTipoMonstruo() + " reducido 30%!"));
+                    System.out.println(Consola.color(Consola.ANSI_CYAN, "-" + tipoValiente + " utilizó Bola de Escarcha, ataque de " + enemigo.getNombreMostrado() + " reducido 20%!"));
                 } else {
-                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + tipoValiente + " utilizó Bola de Escarcha, " + enemigo.getTipoMonstruo() + " ya estaba debilitado."));
+                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + tipoValiente + " utilizó Bola de Escarcha, " + enemigo.getNombreMostrado() + " ya estaba debilitado."));
                 }
                 atacar(enemigo, danoExtra);
             }
@@ -316,9 +333,9 @@ public class Valiente {
                 boolean envenenar = !enemigo.getEnvenenado();
                 if (envenenar) {
                     enemigo.cambiarEstadoVeneno(true);
-                    System.out.println(Consola.color(Consola.ANSI_CYAN, "-" + tipoValiente + " utilizó Colmillo Podrido, " + enemigo.getTipoMonstruo() + " envenenado! (6 hp/turno)"));
+                    System.out.println(Consola.color(Consola.ANSI_CYAN, "-" + tipoValiente + " utilizó Colmillo Podrido, " + enemigo.getNombreMostrado() + " envenenado! (5 hp/turno)"));
                 } else {
-                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + tipoValiente + " utilizó Colmillo Podrido, " + enemigo.getTipoMonstruo() + " ya estaba envenenado."));
+                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + tipoValiente + " utilizó Colmillo Podrido, " + enemigo.getNombreMostrado() + " ya estaba envenenado."));
                 }
                 atacar(enemigo, danoExtra);
             }
@@ -340,14 +357,14 @@ public class Valiente {
             }
             case MAGO -> {
                 if (enemigo.getAtaqueDebilitado()) {
-                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + enemigo.getTipoMonstruo() + " ya está debilitado."));
+                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + enemigo.getNombreMostrado() + " ya está debilitado."));
                     return false;
                 }
                 return true;
             }
             case PICARO -> {
                 if (enemigo.getEnvenenado()) {
-                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + enemigo.getTipoMonstruo() + " ya está envenenado."));
+                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + enemigo.getNombreMostrado() + " ya está envenenado."));
                     return false;
                 }
                 return true;
@@ -391,11 +408,11 @@ public class Valiente {
 
     //Sube nivel y stats
     public void subirNivel() {
-        System.out.printf("%s-Nivel %d +1\t\t\t-Vida %d +10\n-Fuerza %d +1\t\t-Defensa %d +1\n-Habilidad %d +1\t-Velocidad %d +1\n\n%s",
+        System.out.printf("%s-Nivel %d +1\t\t\t-Vida %d +8\n-Fuerza %d +1\t\t-Defensa %d +1\n-Habilidad %d +1\t-Velocidad %d +1\n\n%s",
                 Consola.ANSI_VERDE, nivel, vida, fuerza, defensa, habilidad, velocidad, Consola.ANSI_RESET);
         this.nivel++;
-        this.vidaMaxima += 10;
-        this.vida = Math.min(vidaMaxima, this.vida + 10);
+        this.vidaMaxima += 8;
+        this.vida = Math.min(vidaMaxima, this.vida + 8);
         this.fuerza++;
         this.defensa++;
         this.habilidad++;

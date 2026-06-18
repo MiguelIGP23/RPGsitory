@@ -2,8 +2,11 @@ package migp.logica;
 
 import migp.modelo.Equipable;
 import migp.modelo.InventarioItem;
+import migp.modelo.Monstruo;
 import migp.modelo.Valiente;
 import migp.modelo.enums.TiposEquipable;
+import migp.persistencia.DaoEquipable;
+import migp.persistencia.DaoMonstruo;
 import migp.persistencia.DaoValiente;
 
 import java.util.ArrayList;
@@ -22,21 +25,37 @@ public class Juego {
     private static final Scanner SCANNER = new Scanner(System.in);
 
     private final DaoValiente daoValiente;
+    private final DaoMonstruo daoMonstruo;
+    private final DaoEquipable daoEquipable;
 
     private Valiente valienteJugador;
+    private Mapa mapa;
     private int posX;
     private int posY;
+    private int monstruosDerrotados;
+    private int objetosEncontrados;
+    private int casillasVisitadas;
+    private boolean juegoTerminado;
+    private boolean juegoGanado;
 
     public Juego() {
         this.daoValiente = new DaoValiente();
+        this.daoMonstruo = new DaoMonstruo();
+        this.daoEquipable = new DaoEquipable();
         this.posX = 1;
         this.posY = 1;
+        this.monstruosDerrotados = 0;
+        this.objetosEncontrados = 0;
+        this.casillasVisitadas = 0;
+        this.juegoTerminado = false;
+        this.juegoGanado = false;
     }
 
     //Inicia el juego creando o eligiendo valiente y abre el menú principal
     public void iniciarJuego() {
         System.out.println(Consola.color(Consola.ANSI_CYAN, "=== RPGsitory ===\n"));
         this.valienteJugador = creacionOEleccionValiente();
+        inicializarMapa();
         System.out.println(Consola.color(Consola.ANSI_VERDE, "\nComienza la aventura de " + valienteJugador.getTipoValiente() + " en la posición (1,1).\n"));
         mostrarMenuPrincipal();
     }
@@ -68,13 +87,12 @@ public class Juego {
     public void mostrarMenuPrincipal() {
         boolean salir = false;
 
-        while (!salir) {
+        while (!salir && !juegoTerminado) {
             System.out.println(Consola.color(Consola.ANSI_CYAN, "=== MENÚ PRINCIPAL ==="));
             System.out.println(Consola.color(Consola.ANSI_AMARILLO, "1. Mostrar valiente"));
             System.out.println(Consola.color(Consola.ANSI_AMARILLO, "2. Equipar objeto"));
-            System.out.println(Consola.color(Consola.ANSI_AMARILLO, "3. Mostrar mapa"));
-            System.out.println(Consola.color(Consola.ANSI_AMARILLO, "4. Moverse"));
-            System.out.println(Consola.color(Consola.ANSI_AMARILLO, "5. Salir del juego"));
+            System.out.println(Consola.color(Consola.ANSI_AMARILLO, "3. Moverse"));
+            System.out.println(Consola.color(Consola.ANSI_AMARILLO, "4. Salir del juego"));
             System.out.print(Consola.color(Consola.ANSI_AMARILLO, "\n- Elige opción: "));
 
             int opcion = leerEntero();
@@ -83,9 +101,8 @@ public class Juego {
             switch (opcion) {
                 case 1 -> mostrarValiente();
                 case 2 -> equiparObjeto();
-                case 3 -> mostrarMapa();
-                case 4 -> explorarMapa();
-                case 5 -> {
+                case 3 -> explorarMapa();
+                case 4 -> {
                     salir = true;
                     System.out.println(Consola.color(Consola.ANSI_VERDE, "Saliendo del juego..."));
                 }
@@ -100,6 +117,11 @@ public class Juego {
         System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Nivel actual: " + valienteJugador.getNivel()));
         System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Vida actual: " + valienteJugador.getVida() + "/" + valienteJugador.getVidaMaxima()));
         System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Posición actual: (" + posX + "," + posY + ")"));
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Casillas visitadas: " + casillasVisitadas));
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Monstruos derrotados: " + monstruosDerrotados));
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Monstruos restantes: " + mapa.contarMonstruosRestantes()));
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Compilador Oscuro: " + (juegoGanado ? "Derrotado" : "Pendiente")));
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Objetos encontrados: " + objetosEncontrados));
         System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Objetos en inventario: " + valienteJugador.getInventario().getItems().size()));
         System.out.println();
     }
@@ -301,9 +323,9 @@ public class Juego {
     //Devuelve un resumen legible de la habilidad especial de cada clase
     private String descripcionHabilidadEspecial(Valiente plantilla) {
         return switch (plantilla.getTipoValiente()) {
-            case GUERRERO -> "Carga Asesina: ataque con 160% de potencia";
-            case PALADIN -> "Armadura Sacra: aumenta defensa 40% durante 3 turnos";
-            case MAGO -> "Bola de Escarcha: reduce ataque rival 30% durante 3 turnos";
+            case GUERRERO -> "Carga Asesina: ataque con 150% de potencia";
+            case PALADIN -> "Armadura Sacra: aumenta defensa 25% durante 3 turnos";
+            case MAGO -> "Bola de Escarcha: reduce ataque rival 20% durante 3 turnos";
             case PICARO -> "Colmillo Podrido: envenena durante 3 turnos";
         };
     }
@@ -345,6 +367,9 @@ public class Juego {
         System.out.println(Consola.color(Consola.ANSI_MAGENTA, valienteJugador.toString()));
         System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Vida máxima: " + valienteJugador.getVidaMaxima()));
         System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Posición: (" + posX + "," + posY + ")"));
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Monstruos derrotados: " + monstruosDerrotados));
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Compilador Oscuro: " + (juegoGanado ? "Derrotado" : "Pendiente")));
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Objetos encontrados: " + objetosEncontrados));
         mostrarInventario();
         System.out.println();
     }
@@ -390,14 +415,158 @@ public class Juego {
         }
     }
 
-    //Stub temporal hasta implementar mapa y casillas
-    private void mostrarMapa() {
-        System.out.println(Consola.color(Consola.ANSI_ROJO, "Mapa pendiente de implementación.\n"));
+    private void explorarMapa() {
+        while (!juegoTerminado) {
+            System.out.println(mapa.representar(posX, posY));
+            System.out.println(Consola.color(Consola.ANSI_CYAN, "=== EXPLORAR MAPA ==="));
+            System.out.println(Consola.color(Consola.ANSI_MAGENTA, "- Posición actual: (" + posX + "," + posY + ")"));
+            System.out.println(Consola.color(Consola.ANSI_AMARILLO,
+                    "1. Arriba    2. Abajo    3. Izquierda    4. Derecha    5. Atrás"));
+            System.out.print(Consola.color(Consola.ANSI_AMARILLO, "\n- Elige dirección: "));
+
+            int opcion = leerEntero();
+            System.out.println();
+
+            switch (opcion) {
+                case 1 -> moverValiente(-1, 0);
+                case 2 -> moverValiente(1, 0);
+                case 3 -> moverValiente(0, -1);
+                case 4 -> moverValiente(0, 1);
+                case 5 -> {
+                    return;
+                }
+                default -> System.out.println(Consola.color(Consola.ANSI_ROJO, "Dirección no válida.\n"));
+            }
+        }
     }
 
-    //Stub temporal hasta implementar movimiento y eventos del mapa
-    private void explorarMapa() {
-        System.out.println(Consola.color(Consola.ANSI_ROJO, "Exploración pendiente de implementación.\n"));
+    //Deja el mapa listo y revela la zona de inicio
+    private void inicializarMapa() {
+        this.mapa = new Mapa(daoMonstruo, daoEquipable, valienteJugador.getNivel());
+        this.posX = 1;
+        this.posY = 1;
+        this.monstruosDerrotados = 0;
+        this.objetosEncontrados = 0;
+        this.casillasVisitadas = 1;
+        this.juegoTerminado = false;
+        this.juegoGanado = false;
+    }
+
+    //Mueve al jugador una casilla si la dirección es válida y resuelve su contenido
+    private void moverValiente(int deltaX, int deltaY) {
+        int nuevaX = posX + deltaX;
+        int nuevaY = posY + deltaY;
+
+        if (!mapa.dentroLimites(nuevaX, nuevaY)) {
+            System.out.println(Consola.color(Consola.ANSI_ROJO, "No puedes salir de los límites del mapa.\n"));
+            return;
+        }
+
+        posX = nuevaX;
+        posY = nuevaY;
+        mapa.revelarEntorno(posX, posY);
+
+        Casilla casillaActual = mapa.getCasilla(posX, posY);
+        if (!casillaActual.getVisitada()) {
+            casillasVisitadas++;
+        }
+        casillaActual.marcarVisitada();
+        mapa.prepararCasilla(casillaActual, valienteJugador.getNivel());
+
+        System.out.println(Consola.color(Consola.ANSI_VERDE, "Te desplazas a la posición (" + posX + "," + posY + ")."));
+        resolverCasillaActual(casillaActual);
+        System.out.println();
+    }
+
+    //Al entrar en una casilla se resuelve su evento solo si aún conserva contenido
+    private void resolverCasillaActual(Casilla casillaActual) {
+        if (casillaActual.getJefeFinal() && casillaActual.tieneMonstruo()) {
+            System.out.println(Consola.color(Consola.ANSI_MAGENTA, "*** Has encontrado al Compilador Oscuro. ***\n"));
+            resolverCombateCasilla(casillaActual);
+            return;
+        }
+
+        if (casillaActual.tieneMonstruo()) {
+            resolverCombateCasilla(casillaActual);
+            return;
+        }
+
+        if (casillaActual.tieneObjeto()) {
+            resolverObjetoCasilla(casillaActual);
+            return;
+        }
+
+        System.out.println(Consola.color(Consola.ANSI_CYAN, "La casilla está vacía."));
+    }
+
+    //Tras cada combate se limpia la casilla y se actualiza el estado de la partida
+    private void resolverCombateCasilla(Casilla casillaActual) {
+        Monstruo monstruo = casillaActual.getMonstruo();
+        Combate.iniciarCombate(valienteJugador, monstruo);
+
+        if (valienteJugador.getMuerto()) {
+            juegoTerminado = true;
+            System.out.println(Consola.color(Consola.ANSI_ROJO, "\nFin de la partida."));
+            return;
+        }
+
+        monstruosDerrotados++;
+        boolean jefeFinal = casillaActual.getJefeFinal();
+        casillaActual.eliminarMonstruo();
+
+        if (jefeFinal) {
+            juegoGanado = true;
+            juegoTerminado = true;
+            System.out.println(Consola.color(Consola.ANSI_VERDE, "\nHas derrotado al Compilador Oscuro. Has ganado la partida."));
+        }
+    }
+
+    //Los objetos de equipo se guardan y los curativos se consumen al momento
+    private void resolverObjetoCasilla(Casilla casillaActual) {
+        Equipable objeto = casillaActual.getObjeto();
+        objetosEncontrados++;
+        boolean objetoSuperior = esObjetoSuperiorParaNivel(objeto);
+        String prefijo = objetoSuperior ? "! " : "";
+
+        if (objeto.getTipo() == TiposEquipable.CONSUMIBLE) {
+            int vidaRecuperada = valienteJugador.curar(objeto.getPoder());
+            if (vidaRecuperada > 0) {
+                System.out.println(Consola.color(Consola.ANSI_VERDE,
+                        prefijo + "Has encontrado " + objeto.getNombre() + ", recuperas " + vidaRecuperada + " hp."));
+            } else {
+                System.out.println(Consola.color(Consola.ANSI_AMARILLO,
+                        prefijo + "Has encontrado " + objeto.getNombre() + ", pero tu HP ya estaba al máximo."));
+            }
+        } else {
+            valienteJugador.nuevoObjeto(objeto, 1);
+            String color = objetoSuperior ? Consola.ANSI_VERDE : Consola.ANSI_AZUL;
+            System.out.println(Consola.color(color,
+                    prefijo + "Has encontrado " + objeto.getNombre() + " (" + objeto.getPoder() + ") y pasa a tu inventario."));
+        }
+
+        casillaActual.eliminarObjeto();
+    }
+
+    //Marca hallazgos ligeramente adelantados al nivel actual del valiente
+    private boolean esObjetoSuperiorParaNivel(Equipable objeto) {
+        if (objeto.getTipo() == TiposEquipable.CONSUMIBLE) {
+            return objeto.getPoder() > poderConsumibleEsperado(valienteJugador.getNivel());
+        }
+        return objeto.getPoder() > poderEquipoEsperadoMaximo(valienteJugador.getNivel());
+    }
+
+    private int poderConsumibleEsperado(int nivelValiente) {
+        if (nivelValiente <= 2) {
+            return 20;
+        }
+        if (nivelValiente <= 4) {
+            return 45;
+        }
+        return 80;
+    }
+
+    private int poderEquipoEsperadoMaximo(int nivelValiente) {
+        return Math.min(8, nivelValiente + 3);
     }
 
     //Pide los puntos extra de un atributo teniendo en cuenta los puntos restantes
