@@ -1,6 +1,7 @@
 package migp;
 
 
+import migp.logica.Juego;
 import migp.persistencia.ConexionBaseDatos;
 import migp.persistencia.DaoEquipable;
 import migp.logica.Combate;
@@ -13,6 +14,11 @@ import migp.persistencia.DaoValiente;
 public class Main {
     public static void main(String[] args) {
 
+        Juego juego = new Juego();
+        juego.iniciarJuego();
+
+        // Pruebas puntuales
+        /*
         DaoValiente daov = new DaoValiente();
         Valiente v = daov.buscarPorTipo("picaro".toUpperCase());
 
@@ -54,6 +60,7 @@ public class Main {
         // Prueba de combate
 
         Combate.iniciarCombate(v, m);
+        */
 
         //Cierra conexión db importante para borrar db temporal
         ConexionBaseDatos.getInstance().cerrar();

@@ -22,19 +22,19 @@ public class Combate {
         //Guarda y restaura atributos del jugador al final del combate
         int fuerzaInicial = valiente.getFuerza();
         int defensaInicial = valiente.getDefensa();
-        System.out.println("***  Apareció un " + monstruo.getTipoMonstruo() + " nivel " + monstruo.getNivel() + "!  ***\n");
-        System.out.println(valiente);
-        System.out.println(monstruo);
-        turnoCombate=1;
+        System.out.println(Consola.color(Consola.ANSI_AZUL, "***  Apareció un " + monstruo.getTipoMonstruo() + " nivel " + monstruo.getNivel() + "!  ***\n"));
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, valiente.toString()));
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, monstruo.toString()));
+        turnoCombate = 1;
         while (!valiente.getMuerto() && !monstruo.getMuerto()) {
             turno(valiente, monstruo);
             turnoCombate++;
         }
-        if (valiente.getMuerto()){
-            System.out.println("\n\t\txxx HAS MUERTO xxx");
-        }else {
-            System.out.println("\n\t\t-- VICTORIA --");
-            System.out.println(valiente);
+        if (valiente.getMuerto()) {
+            System.out.println(Consola.color(Consola.ANSI_ROJO, "\n\t\txxx HAS MUERTO xxx"));
+        } else {
+            System.out.println(Consola.color(Consola.ANSI_VERDE, "\n\t\t-- VICTORIA --"));
+            System.out.println(Consola.color(Consola.ANSI_MAGENTA, valiente.toString()));
             valiente.setFuerza(fuerzaInicial);
             valiente.setDefensa(defensaInicial);
             valiente.subirNivel();
@@ -57,7 +57,7 @@ public class Combate {
                 return usarConsumibleEnCombate(valiente);
             }
             default -> {
-                System.out.println("Opción de turno no valida");
+                System.out.println(Consola.color(Consola.ANSI_ROJO, "Opción de turno no valida"));
                 return false;
             }
         }
@@ -70,8 +70,8 @@ public class Combate {
         double iniVal = iniciativa(valiente);
         double iniMon = iniciativa(monstruo);
         //El jugador elige accion antes de resolver el orden real del turno
-        System.out.printf("\n\n\t\tTURNO %d\n", turnoCombate);
-        int opcion = turnoJugador(valiente);
+        System.out.printf("%s\n\n\t\tTURNO %d\n%s", Consola.ANSI_CYAN, turnoCombate, Consola.ANSI_RESET);
+        int opcion = turnoJugador(valiente, monstruo);
 
         //La iniciativa decide quien ejecuta primero la accion
         boolean monstruoPrimero = iniMon > iniVal;
@@ -79,7 +79,7 @@ public class Combate {
         if (monstruoPrimero) {
             // Turno monstruo
             if (ataqueExitoso(monstruo, valiente)) monstruo.atacar(valiente);
-            else System.out.println("--" + monstruo.getTipoMonstruo() + " falló el ataque!");
+            else System.out.println(Consola.color(Consola.ANSI_ROJO, "- " + monstruo.getTipoMonstruo() + " falló el ataque!"));
 
             if (valiente.getMuerto()) return;
 
@@ -94,12 +94,14 @@ public class Combate {
 
             // Turno monstruo
             if (ataqueExitoso(monstruo, valiente)) monstruo.atacar(valiente);
-            else System.out.println("-" + monstruo.getTipoMonstruo() + " falló el ataque!");
+            else System.out.println(Consola.color(Consola.ANSI_ROJO, "- " + monstruo.getTipoMonstruo() + " falló el ataque!"));
         }
         //El veneno se resuelve una sola vez al final del turno
         monstruo.aplicarVeneno();
-        System.out.println("\n-HP " + valiente.getTipoValiente() + ": " + valiente.getVida());
-        System.out.println("-HP " + monstruo.getTipoMonstruo() + ": " + monstruo.getVida());
+        monstruo.actualizarDebuffAtaque();
+        valiente.actualizarBuff();
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, "\n-HP " + valiente.getTipoValiente() + ": " + valiente.getVida()));
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, "-HP " + monstruo.getTipoMonstruo() + ": " + monstruo.getVida()));
     }
 
 
@@ -115,24 +117,6 @@ public class Combate {
         return iniciativa;
     }
 
-    //La formula del enunciado da tasas de éxito ~0
-//    public static boolean ataqueExitoso(Object atacante, Object defensor) {
-//        boolean exito = false;
-//        int random = (int) (Math.random() * 101);
-//        if (atacante instanceof Valiente ata && defensor instanceof Monstruo def) {
-//            if (random < (ata.getHabilidad() - def.getDefensa())) {
-//                exito = true;
-//            }
-//        } else if (atacante instanceof Monstruo ata && defensor instanceof Valiente def) {
-//            Equipable escudo = new DaoEquipable().buscarPorTipo(def.getEscudo());
-//            int poderEscudo = (escudo!=null) ? escudo.getPoder() : 0;
-//            if (random < (ata.getHabilidad() - (def.getDefensa() + poderEscudo))) {
-//                exito = true;
-//            }
-//        }
-//        return exito;
-//    }
-
     //Para calcular % acierto usa formula % = base_hit + %diferencia * ( ata.habilidad - ( def.defensa + escudo.poder ))
     //Después lanza número entre 1 y 100, y si probabilidad es mayor que número aleatorio ataque es exitoso
     public static boolean ataqueExitoso(Object atacante, Object defensor) {
@@ -142,13 +126,13 @@ public class Combate {
         if (atacante instanceof Valiente ata && defensor instanceof Monstruo def) {
             probAcierto = BASE_HIT + DIFICULTAD * (ata.getHabilidad() - (def.getDefensa()));
             probMinima = (int) (Math.random() * 101);
-            if (probAcierto>probMinima) {
+            if (probAcierto > probMinima) {
                 exito = true;
             }
         } else if (atacante instanceof Monstruo ata && defensor instanceof Valiente def) {
             probAcierto = BASE_HIT + DIFICULTAD * (ata.getHabilidad() - def.getDefensa());
             probMinima = (int) (Math.random() * 101);
-            if (probAcierto>probMinima) {
+            if (probAcierto > probMinima) {
                 exito = true;
             }
         }
@@ -156,9 +140,9 @@ public class Combate {
     }
 
     //Recoge una accion valida del jugador y permite volver atras desde consumibles
-    private static int turnoJugador(Valiente valiente) {
+    private static int turnoJugador(Valiente valiente, Monstruo monstruo) {
         while (true) {
-            System.out.println("1.Ataque   2.Usar habilidad   3.Usar objeto");
+            System.out.println(Consola.color(Consola.ANSI_AMARILLO, "1.Ataque   2.Usar habilidad   3.Usar objeto"));
             int opcion = SCANNER.nextInt();
             System.out.println();
 
@@ -166,10 +150,14 @@ public class Combate {
                 if (usarConsumibleEnCombate(valiente)) {
                     return opcion;
                 }
+            } else if (opcion == 2) {
+                if (valiente.puedeUsarHabilidadEspecial(monstruo)) {
+                    return opcion;
+                }
             } else if (opcion == 1 || opcion == 2) {
                 return opcion;
             } else {
-                System.out.println("Opción de turno no valida");
+                System.out.println(Consola.color(Consola.ANSI_ROJO, "Opción de turno no valida"));
             }
         }
     }
@@ -182,7 +170,7 @@ public class Combate {
         if (ataqueExitoso(valiente, monstruo)) {
             opcionesCombate(valiente, monstruo, opcion);
         } else {
-            System.out.println("-" + valiente.getTipoValiente() + " tu ataque falló!");
+            System.out.println(Consola.color(Consola.ANSI_ROJO, "- " + valiente.getTipoValiente() + " tu ataque falló!"));
         }
     }
 
@@ -190,29 +178,31 @@ public class Combate {
     private static boolean usarConsumibleEnCombate(Valiente valiente) {
         while (true) {
             List<InventarioItem> consumibles = valiente.getInventario().getConsumibles();
-            System.out.println("Consumibles disponibles:\n");
+            System.out.println(Consola.color(Consola.ANSI_AMARILLO, "Consumibles disponibles:\n"));
 
             if (consumibles.isEmpty()) {
-                System.out.println(" XX No tienes consumibles.");
+                System.out.println(Consola.color(Consola.ANSI_ROJO, " XX No tienes consumibles."));
             }
 
-            System.out.println("1. Atrás");
+            System.out.println(Consola.color(Consola.ANSI_AZUL, "1. Atrás"));
             for (int i = 0; i < consumibles.size(); i++) {
                 InventarioItem item = consumibles.get(i);
-                System.out.printf("%d. %s x%d (%d vida)%n",
+                System.out.printf("%s%d. %s x%d (%d vida)%n%s",
+                        Consola.ANSI_AZUL,
                         i + 2,
                         item.getEquipable().getNombre(),
                         item.getCantidad(),
-                        item.getEquipable().getPoder());
+                        item.getEquipable().getPoder(),
+                        Consola.ANSI_RESET);
             }
 
-            System.out.print("\n- Elige consumible: ");
+            System.out.print(Consola.color(Consola.ANSI_AMARILLO, "\n- Elige consumible: "));
             int opcionConsumible = SCANNER.nextInt();
             if (opcionConsumible == 1) {
                 return false;
             }
             if (opcionConsumible < 2 || opcionConsumible > consumibles.size() + 1) {
-                System.out.println("\nXX  Consumible no válido.  XX");
+                System.out.println(Consola.color(Consola.ANSI_ROJO, "\nXX  Consumible no válido.  XX"));
                 continue;
             }
 
@@ -221,16 +211,24 @@ public class Combate {
             }
 
             InventarioItem seleccionado = consumibles.get(opcionConsumible - 2);
-            System.out.print("- Cantidad a usar: ");
+            if (valiente.getVida() >= valiente.getVidaMaxima()) {
+                System.out.println(Consola.color(Consola.ANSI_ROJO, "\n- Tus HP está al máximo."));
+                continue;
+            }
+
+            System.out.print(Consola.color(Consola.ANSI_AMARILLO, "- Cantidad a usar: "));
             int cantidad = SCANNER.nextInt();
 
+            int vidaAntes = valiente.getVida();
             boolean usado = valiente.usarConsumible(seleccionado.getEquipable(), cantidad);
             if (usado) {
-                System.out.println("\nHas usado " + cantidad + " " + seleccionado.getEquipable().getNombre() + ".");
+                int vidaRecuperada = valiente.getVida() - vidaAntes;
+                System.out.println(Consola.color(Consola.ANSI_VERDE, "\n- Has usado " + cantidad + " " + seleccionado.getEquipable().getNombre()
+                        + ", recuperas " + vidaRecuperada + " hp."));
                 return true;
             }
 
-            System.out.println("No se pudo usar el consumible.");
+            System.out.println(Consola.color(Consola.ANSI_ROJO, "No se pudo usar el consumible."));
         }
     }
 }

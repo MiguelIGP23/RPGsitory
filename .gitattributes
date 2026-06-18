@@ -1,2 +1,14 @@
-# Siempre mantener la versión local del archivo de base de datos al hacer merge por si se modifica
+# Normalize text files and keep binary assets untouched.
+* text=auto
+*.java text
+*.md text
+*.xml text
+*.gitignore text
+*.gitattributes text
+
+*.db binary
+*.jar binary
+*.class binary
+
+# Keep the local database file on merges if it changes.
 src/main/resources/rpg.db merge=ours
