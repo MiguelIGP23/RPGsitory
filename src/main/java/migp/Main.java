@@ -1,7 +1,6 @@
 package migp;
 
 
-import migp.modelo.InventarioItem;
 import migp.persistencia.ConexionBaseDatos;
 import migp.persistencia.DaoEquipable;
 import migp.logica.Combate;
@@ -10,8 +9,6 @@ import migp.modelo.Monstruo;
 import migp.modelo.Valiente;
 import migp.persistencia.DaoMonstruo;
 import migp.persistencia.DaoValiente;
-
-import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
