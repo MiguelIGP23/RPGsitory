@@ -1,5 +1,6 @@
 package migp.modelo;
 
+import migp.logica.Consola;
 import migp.modelo.enums.TiposMonstruo;
 
 public class Monstruo {
@@ -7,6 +8,7 @@ public class Monstruo {
     //Atributos de clase - parámetros para ajustar daño
     public static final int DANO_VENENO = 6;
     public static final int TURNOS_VENENO = 3;
+    public static final int TURNOS_DEBUFF_ATAQUE = 3;
     public static final double SUBIDA_NIVEL =0.1;
 
 
@@ -22,6 +24,9 @@ public class Monstruo {
     private boolean muerto;
     private boolean envenenado;
     private int contadorVeneno;
+    private boolean ataqueDebilitado;
+    private int contadorDebuffAtaque;
+    private int reduccionFuerzaDebuff;
 
     public Monstruo(TiposMonstruo tipo, int vida, int fuerza, int defensa, int habilidad, int velocidad) {
         double lvl = Math.random() * 10;
@@ -38,6 +43,9 @@ public class Monstruo {
         this.muerto = false;
         this.envenenado = false;
         this.contadorVeneno = 0;
+        this.ataqueDebilitado = false;
+        this.contadorDebuffAtaque = 0;
+        this.reduccionFuerzaDebuff = 0;
     }
 
 
@@ -76,9 +84,26 @@ public class Monstruo {
         return envenenado;
     }
 
+    public boolean getAtaqueDebilitado() {
+        return ataqueDebilitado;
+    }
+
     //Metodos set
     public void setFuerza(int fuerza) {
         this.fuerza = fuerza;
+    }
+
+    //Reduce temporalmente la fuerza del monstruo si no estaba ya debilitado
+    public boolean aplicarDebuffAtaque(float reduccionPorcentual) {
+        if (ataqueDebilitado) {
+            return false;
+        }
+
+        reduccionFuerzaDebuff = Math.max(1, Math.round(fuerza * reduccionPorcentual));
+        fuerza = Math.max(1, fuerza - reduccionFuerzaDebuff);
+        ataqueDebilitado = true;
+        contadorDebuffAtaque = TURNOS_DEBUFF_ATAQUE;
+        return true;
     }
 
 
@@ -101,7 +126,7 @@ public class Monstruo {
         int vidaInicialValiente = valiente.getVida();
         valiente.recibirDano(fuerza);
         int danoReal = vidaInicialValiente - valiente.getVida();
-        System.out.println("- " + tipoMonstruo + " ataca, " + valiente.getTipoValiente() + " pierde " + danoReal + " de vida");
+        System.out.println(Consola.color(Consola.ANSI_ROJO, "- " + tipoMonstruo + " ataca, " + valiente.getTipoValiente() + " pierde " + danoReal + " de vida"));
     }
 
     //Recibe daño de valiente
@@ -128,12 +153,12 @@ public class Monstruo {
             vida = 0;
             muerto = true;
         }
-        System.out.println("\n-" + tipoMonstruo + " pierde " + danoVeneno + " de vida por veneno");
+        System.out.println(Consola.color(Consola.ANSI_AMARILLO, "\n-" + tipoMonstruo + " pierde " + danoVeneno + " de vida por veneno"));
 
         if ((contadorVeneno--) == 0) {
             cambiarEstadoVeneno(false);
             if (!muerto) {
-                System.out.println("-" + tipoMonstruo + " ya no está envenenado.");
+                System.out.println(Consola.color(Consola.ANSI_AMARILLO, "-" + tipoMonstruo + " ya no está envenenado."));
             }
         }
     }
@@ -144,6 +169,21 @@ public class Monstruo {
         this.envenenado = envenenar;
         if (envenenar) {
             contadorVeneno = TURNOS_VENENO - 1;
+        }
+    }
+
+    //Actualiza la duración del debuff de ataque y restaura la fuerza al caducar
+    public void actualizarDebuffAtaque() {
+        if (!ataqueDebilitado) {
+            return;
+        }
+
+        contadorDebuffAtaque--;
+        if (contadorDebuffAtaque <= 0) {
+            fuerza += reduccionFuerzaDebuff;
+            ataqueDebilitado = false;
+            reduccionFuerzaDebuff = 0;
+            System.out.println(Consola.color(Consola.ANSI_AMARILLO, "-" + tipoMonstruo + " recupera su fuerza."));
         }
     }
 }

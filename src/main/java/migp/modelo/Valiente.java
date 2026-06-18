@@ -1,5 +1,6 @@
 package migp.modelo;
 
+import migp.logica.Consola;
 import migp.modelo.enums.TiposValiente;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ public class Valiente {
     public static final float DANO_HAB_PICARO = 0.4f;
 
     public static final float AUMENTO_DEFENSA_PALADIN = 0.40f;
+    public static final int TURNOS_BUFF_PALADIN = 3;
     public static final float REDUCCION_ATAQUE_MAGO = 0.30f;
     //Atributos de instancia
     private TiposValiente tipoValiente;
@@ -31,6 +33,7 @@ public class Valiente {
     private boolean muerto;
     private boolean buff;
     private int contadorBuff;
+    private int bonusDefensaBuff;
 
     private List<Monstruo> victorias;       //Guarda historial de monstruos derrotados
 
@@ -50,6 +53,7 @@ public class Valiente {
         this.muerto = false;
         this.buff = false;
         this.contadorBuff = 0;
+        this.bonusDefensaBuff = 0;
 
         this.victorias = new ArrayList<>();
 
@@ -93,8 +97,16 @@ public class Valiente {
         return habilidad;
     }
 
+    public int getNivel() {
+        return nivel;
+    }
+
     public boolean getMuerto() {
         return muerto;
+    }
+
+    public boolean getBuff() {
+        return buff;
     }
 
     public Equipable getArma() {
@@ -131,16 +143,18 @@ public class Valiente {
     //Metodo toString
     @Override
     public String toString() {
-        return tipoValiente +
-                ": Nivel: " + nivel +
-                ", Vida: " + vida +
-                ", Fuerza: " + fuerza +
-                ", Defensa: " + defensa +
-                ", Habilidad: " + habilidad +
-                ", Velocidad: " + velocidad +
-                ", Arma: " + (arma != null ? arma.getNombre() + "-" + arma.getPoder() : "-") +
-                ", Escudo: " + (escudo != null ? escudo.getNombre() + "-" + escudo.getPoder() : "-")
-                ;
+        return String.format(
+                "%-8s: Nivel: %d, Vida: %d, Fuerza: %d, Defensa: %d, Habilidad: %d, Velocidad: %d, Arma: %s, Escudo: %s",
+                tipoValiente,
+                nivel,
+                vida,
+                fuerza,
+                defensa,
+                habilidad,
+                velocidad,
+                (arma != null ? arma.getNombre() + "-" + arma.getPoder() : "-"),
+                (escudo != null ? escudo.getNombre() + "-" + escudo.getPoder() : "-")
+        );
     }
 
 
@@ -255,7 +269,7 @@ public class Valiente {
         int vidaInicialEnemigo = enemigo.getVida();
         enemigo.recibirDaño(ataque);
         int danoReal = vidaInicialEnemigo - enemigo.getVida();
-        System.out.println("- " + tipoValiente + " ataca, " + enemigo.getTipoMonstruo() + " pierde " + danoReal + " de vida");
+        System.out.println(Consola.color(Consola.ANSI_VERDE, "- " + tipoValiente + " ataca, " + enemigo.getTipoMonstruo() + " pierde " + danoReal + " de vida"));
     }
 
     //Recibe daño de monstruo
@@ -274,24 +288,26 @@ public class Valiente {
         switch (tipoValiente) {
             case GUERRERO -> {
                 //Golpe fuerte daño extra
-                int danoExtra = Math.round(fuerza * DANO_HAB_GUERRERO);
-                System.out.println("-"+tipoValiente + " utilizó Carga Asesina!");
+                int danoExtra = Math.round(fuerza * (DANO_HAB_GUERRERO - 1));
+                System.out.println(Consola.color(Consola.ANSI_CYAN, "-" + tipoValiente + " utilizó Carga Asesina!"));
                 atacar(enemigo, danoExtra);
             }
             case PALADIN -> {
                 //Golpe flojo y aumenta defensa
                 int danoExtra = Math.round(fuerza * (DANO_HAB_PALADIN - 1));
-                this.defensa += Math.round(defensa * AUMENTO_DEFENSA_PALADIN);
-                this.buff = true;
-                System.out.println("-"+tipoValiente + " utilizó Armadura Sacra, defensa aumentada 40%!");
+                activarBuff(true);
+                System.out.println(Consola.color(Consola.ANSI_CYAN, "-" + tipoValiente + " utilizó Armadura Sacra, defensa aumentada 40%!"));
                 atacar(enemigo, danoExtra);
             }
             case MAGO -> {
                 //Golpe flojo y baja ataque
                 int danoExtra = Math.round(fuerza * (DANO_HAB_MAGO - 1));
-                int ataqueReducido = Math.round(enemigo.getFuerza() * (REDUCCION_ATAQUE_MAGO - 1));
-                enemigo.setFuerza(ataqueReducido);
-                System.out.println("-"+tipoValiente + " utilizó Bola de Escarcha, ataque de " + enemigo.getTipoMonstruo() + " reducido 30%!");
+                boolean debilitado = enemigo.aplicarDebuffAtaque(REDUCCION_ATAQUE_MAGO);
+                if (debilitado) {
+                    System.out.println(Consola.color(Consola.ANSI_CYAN, "-" + tipoValiente + " utilizó Bola de Escarcha, ataque de " + enemigo.getTipoMonstruo() + " reducido 30%!"));
+                } else {
+                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + tipoValiente + " utilizó Bola de Escarcha, " + enemigo.getTipoMonstruo() + " ya estaba debilitado."));
+                }
                 atacar(enemigo, danoExtra);
             }
             case PICARO -> {
@@ -300,11 +316,44 @@ public class Valiente {
                 boolean envenenar = !enemigo.getEnvenenado();
                 if (envenenar) {
                     enemigo.cambiarEstadoVeneno(true);
-                    System.out.println("-"+tipoValiente + " utilizó Colmillo Podrido, " + enemigo.getTipoMonstruo() + " envenenado! (6 hp/turno)");
+                    System.out.println(Consola.color(Consola.ANSI_CYAN, "-" + tipoValiente + " utilizó Colmillo Podrido, " + enemigo.getTipoMonstruo() + " envenenado! (6 hp/turno)"));
                 } else {
-                    System.out.println("-"+tipoValiente + " utilizó Colmillo Podrido, " + enemigo.getTipoMonstruo() + " ya estaba envenenado..");
+                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + tipoValiente + " utilizó Colmillo Podrido, " + enemigo.getTipoMonstruo() + " ya estaba envenenado."));
                 }
                 atacar(enemigo, danoExtra);
+            }
+        }
+    }
+
+    //Comprueba si la habilidad especial puede aplicarse antes de gastar el turno
+    public boolean puedeUsarHabilidadEspecial(Monstruo enemigo) {
+        switch (tipoValiente) {
+            case GUERRERO -> {
+                return true;
+            }
+            case PALADIN -> {
+                if (buff) {
+                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + tipoValiente + " ya tiene Armadura Sacra activa."));
+                    return false;
+                }
+                return true;
+            }
+            case MAGO -> {
+                if (enemigo.getAtaqueDebilitado()) {
+                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + enemigo.getTipoMonstruo() + " ya está debilitado."));
+                    return false;
+                }
+                return true;
+            }
+            case PICARO -> {
+                if (enemigo.getEnvenenado()) {
+                    System.out.println(Consola.color(Consola.ANSI_ROJO, "-" + enemigo.getTipoMonstruo() + " ya está envenenado."));
+                    return false;
+                }
+                return true;
+            }
+            default -> {
+                return true;
             }
         }
     }
@@ -312,17 +361,38 @@ public class Valiente {
     //Si recibe true cambia activa buff e inicia contador de 3 turnos
     public void activarBuff(boolean buff) {
         if (buff) {
+            if (!this.buff) {
+                bonusDefensaBuff = Math.max(1, Math.round(defensa * AUMENTO_DEFENSA_PALADIN));
+                this.defensa += bonusDefensaBuff;
+            }
             this.buff = buff;
-            contadorBuff = 3;
+            contadorBuff = TURNOS_BUFF_PALADIN;
         } else {
+            if (this.buff && bonusDefensaBuff > 0) {
+                this.defensa -= bonusDefensaBuff;
+            }
             this.buff = false;
+            this.contadorBuff = 0;
+            this.bonusDefensaBuff = 0;
+        }
+    }
+
+    //Actualiza la duración del buff al final del turno y lo elimina cuando caduca
+    public void actualizarBuff() {
+        if (!buff) {
+            return;
+        }
+        contadorBuff--;
+        if (contadorBuff <= 0) {
+            activarBuff(false);
+            System.out.println(Consola.color(Consola.ANSI_AMARILLO, "-" + tipoValiente + " ya no tiene Armadura Sacra activa."));
         }
     }
 
     //Sube nivel y stats
     public void subirNivel() {
-        System.out.printf("-Nivel " + nivel + " +1\t\t\t-Vida " + vida + " +10\n-Fuerza " + fuerza + " +1" +
-                "\t\t-Defensa " + defensa + " +1\n-Habilidad " + habilidad + " +1\t-Velocidad " + velocidad + " +1\n\n");
+        System.out.printf("%s-Nivel %d +1\t\t\t-Vida %d +10\n-Fuerza %d +1\t\t-Defensa %d +1\n-Habilidad %d +1\t-Velocidad %d +1\n\n%s",
+                Consola.ANSI_VERDE, nivel, vida, fuerza, defensa, habilidad, velocidad, Consola.ANSI_RESET);
         this.nivel++;
         this.vidaMaxima += 10;
         this.vida = Math.min(vidaMaxima, this.vida + 10);
@@ -330,6 +400,6 @@ public class Valiente {
         this.defensa++;
         this.habilidad++;
         this.velocidad++;
-        System.out.println(this.toString());
+        System.out.println(Consola.color(Consola.ANSI_MAGENTA, this.toString()));
     }
 }
