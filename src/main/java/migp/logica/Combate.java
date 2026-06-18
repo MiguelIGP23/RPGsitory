@@ -1,5 +1,6 @@
 package migp.logica;
 
+import migp.modelo.InventarioItem;
 import migp.modelo.Monstruo;
 import migp.modelo.Valiente;
 
