@@ -12,6 +12,12 @@ public class InventarioItem {
     private int cantidad;
 
     public InventarioItem(Equipable equipable, int cantidad){
+        if (equipable == null) {
+            throw new IllegalArgumentException("El equipable no puede ser null");
+        }
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser mayor que 0");
+        }
         this.equipable=equipable;
         this.cantidad=cantidad;
     }
@@ -24,7 +30,12 @@ public class InventarioItem {
         return cantidad;
     }
 
-    public void setCantidad(int cantidad) {this.cantidad = cantidad;}
+    public void setCantidad(int cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser mayor que 0");
+        }
+        this.cantidad = cantidad;
+    }
 
     @Override
     public String toString() {
