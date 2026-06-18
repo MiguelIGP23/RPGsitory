@@ -101,7 +101,7 @@ public class Monstruo {
         int vidaInicialValiente = valiente.getVida();
         valiente.recibirDano(fuerza);
         int danoReal = vidaInicialValiente - valiente.getVida();
-        System.out.println("-" + tipoMonstruo + " ataca, " + valiente.getTipoValiente() + " pierde " + danoReal + " de vida");
+        System.out.println("- " + tipoMonstruo + " ataca, " + valiente.getTipoValiente() + " pierde " + danoReal + " de vida");
     }
 
     //Recibe daño de valiente
@@ -128,11 +128,13 @@ public class Monstruo {
             vida = 0;
             muerto = true;
         }
-        System.out.println("-" + tipoMonstruo + " pierde " + danoVeneno + " de vida por veneno");
+        System.out.println("\n-" + tipoMonstruo + " pierde " + danoVeneno + " de vida por veneno");
 
         if ((contadorVeneno--) == 0) {
             cambiarEstadoVeneno(false);
-            System.out.println(tipoMonstruo + " ya no esta envenenado");
+            if (!muerto) {
+                System.out.println("-" + tipoMonstruo + " ya no está envenenado.");
+            }
         }
     }
 

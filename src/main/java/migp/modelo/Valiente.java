@@ -15,11 +15,10 @@ public class Valiente {
 
     public static final float AUMENTO_DEFENSA_PALADIN = 0.40f;
     public static final float REDUCCION_ATAQUE_MAGO = 0.30f;
-    public static final int VIDA_MAXIMA = 100;
-
     //Atributos de instancia
     private TiposValiente tipoValiente;
     private int vida;
+    private int vidaMaxima;
     private int fuerza;
     private int defensa;
     private int habilidad;
@@ -37,7 +36,8 @@ public class Valiente {
 
     public Valiente(TiposValiente tipoValiente, int vida, int fuerza, int defensa, int habilidad, int velocidad, Equipable arma, Equipable escudo, int nivel) {
         this.tipoValiente = tipoValiente;
-        this.vida = Math.min(vida, VIDA_MAXIMA);
+        this.vidaMaxima = vida;
+        this.vida = vida;
         this.fuerza = fuerza;
         this.defensa = defensa;
         this.habilidad = habilidad;
@@ -71,6 +71,10 @@ public class Valiente {
 
     public int getVida() {
         return vida;
+    }
+
+    public int getVidaMaxima() {
+        return vidaMaxima;
     }
 
     public int getFuerza() {
@@ -211,7 +215,7 @@ public class Valiente {
         List<InventarioItem> listaConsumibles = inventario.getConsumibles();
         for (InventarioItem consumible : listaConsumibles) {
             if (usado.getNombre().equalsIgnoreCase(consumible.getEquipable().getNombre()) && cantidad <= consumible.getCantidad()) {
-                this.vida = Math.min(VIDA_MAXIMA, this.vida + (consumible.getEquipable().getPoder() * cantidad));
+                this.vida = Math.min(vidaMaxima, this.vida + (consumible.getEquipable().getPoder() * cantidad));
                 inventario.eliminarItem(consumible.getEquipable(), cantidad);
                 return true;
             }
@@ -251,7 +255,7 @@ public class Valiente {
         int vidaInicialEnemigo = enemigo.getVida();
         enemigo.recibirDaño(ataque);
         int danoReal = vidaInicialEnemigo - enemigo.getVida();
-        System.out.println("-" + tipoValiente + " ataca, " + enemigo.getTipoMonstruo() + " pierde " + danoReal + " de vida");
+        System.out.println("- " + tipoValiente + " ataca, " + enemigo.getTipoMonstruo() + " pierde " + danoReal + " de vida");
     }
 
     //Recibe daño de monstruo
@@ -271,7 +275,7 @@ public class Valiente {
             case GUERRERO -> {
                 //Golpe fuerte daño extra
                 int danoExtra = Math.round(fuerza * DANO_HAB_GUERRERO);
-                System.out.println(tipoValiente + " utilizó Carga Asesina!");
+                System.out.println("-"+tipoValiente + " utilizó Carga Asesina!");
                 atacar(enemigo, danoExtra);
             }
             case PALADIN -> {
@@ -279,7 +283,7 @@ public class Valiente {
                 int danoExtra = Math.round(fuerza * (DANO_HAB_PALADIN - 1));
                 this.defensa += Math.round(defensa * AUMENTO_DEFENSA_PALADIN);
                 this.buff = true;
-                System.out.println(tipoValiente + " utilizó Armadura Sacra, defensa aumentada 40%!");
+                System.out.println("-"+tipoValiente + " utilizó Armadura Sacra, defensa aumentada 40%!");
                 atacar(enemigo, danoExtra);
             }
             case MAGO -> {
@@ -287,7 +291,7 @@ public class Valiente {
                 int danoExtra = Math.round(fuerza * (DANO_HAB_MAGO - 1));
                 int ataqueReducido = Math.round(enemigo.getFuerza() * (REDUCCION_ATAQUE_MAGO - 1));
                 enemigo.setFuerza(ataqueReducido);
-                System.out.println(tipoValiente + " utilizó Bola de Escarcha, ataque de " + enemigo.getTipoMonstruo() + " reducido 30%!");
+                System.out.println("-"+tipoValiente + " utilizó Bola de Escarcha, ataque de " + enemigo.getTipoMonstruo() + " reducido 30%!");
                 atacar(enemigo, danoExtra);
             }
             case PICARO -> {
@@ -296,9 +300,9 @@ public class Valiente {
                 boolean envenenar = !enemigo.getEnvenenado();
                 if (envenenar) {
                     enemigo.cambiarEstadoVeneno(true);
-                    System.out.println(tipoValiente + " utilizó Colmillo Podrido, " + enemigo.getTipoMonstruo() + " envenenado! (6 hp/turno)");
+                    System.out.println("-"+tipoValiente + " utilizó Colmillo Podrido, " + enemigo.getTipoMonstruo() + " envenenado! (6 hp/turno)");
                 } else {
-                    System.out.println(tipoValiente + " utilizó Colmillo Podrido!");
+                    System.out.println("-"+tipoValiente + " utilizó Colmillo Podrido, " + enemigo.getTipoMonstruo() + " ya estaba envenenado..");
                 }
                 atacar(enemigo, danoExtra);
             }
@@ -320,7 +324,8 @@ public class Valiente {
         System.out.printf("-Nivel " + nivel + " +1\t\t\t-Vida " + vida + " +10\n-Fuerza " + fuerza + " +1" +
                 "\t\t-Defensa " + defensa + " +1\n-Habilidad " + habilidad + " +1\t-Velocidad " + velocidad + " +1\n\n");
         this.nivel++;
-        this.vida = Math.min(VIDA_MAXIMA, this.vida + 10);
+        this.vidaMaxima += 10;
+        this.vida = Math.min(vidaMaxima, this.vida + 10);
         this.fuerza++;
         this.defensa++;
         this.habilidad++;
